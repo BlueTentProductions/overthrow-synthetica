@@ -1,16 +1,22 @@
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Controls } from './fps-controls'
+import { Floor } from './floor'
+import { Scene } from 'three';
 
 var scene: THREE.Scene
 var camera: THREE.PerspectiveCamera
 var renderer: THREE.WebGLRenderer
 
+var loader: GLTFLoader
+
 var controls: Controls
 
-var floor: THREE.Mesh
+var floor: Floor
 
 var prevTime: number = performance.now()
 
+// init all basic scene stuff
 function init() {
     scene = new THREE.Scene()
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -20,18 +26,19 @@ function init() {
     renderer = new THREE.WebGLRenderer()
     renderer.setSize(window.innerWidth, window.innerHeight)
     document.body.appendChild(renderer.domElement)
+
+    loader = new GLTFLoader()
+
+    let sun = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
+    let ambient = new THREE.AmbientLight(0xffffff);
+    scene.add(sun);
+    scene.add(ambient);
+    scene.background = new THREE.Color(0xffffff);
+
+    floor = new Floor(1000)
+    scene.add(floor.mesh)
     
     controls = new Controls(camera)
-    
-    const floorGeo: THREE.PlaneGeometry = new THREE.PlaneGeometry(1000, 1000, 64, 64)
-    floorGeo.rotateX(- Math.PI / 2)
-    const floorMat: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        wireframe: true,
-    })
-
-    floor = new THREE.Mesh(floorGeo, floorMat)
-    scene.add(floor)
     
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight
@@ -44,8 +51,16 @@ function init() {
         // only activate controls when game is unpaused
         controls.activate()
     })
+
+    scene.add(camera)
 }
 
+// load assets async
+async function loadAssets() {
+    await controls.loadAssets(loader)
+}
+
+// game loop
 function animate() {
     requestAnimationFrame(animate)
 
@@ -71,4 +86,5 @@ function render() {
 }
 
 init()
+loadAssets()
 animate()

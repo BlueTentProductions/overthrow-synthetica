@@ -1,5 +1,5 @@
 {
-  "name": "three.js-typescript-boilerplate",
+  "name": "overthrow",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && node ./dist/server/server.js"
   },
-  "author": "Sean Bradley",
+  "author": "BlueTentProductions",
   "license": "ISC",
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",

@@ -1,5 +1,8 @@
 import * as THREE from 'three'
-import { Vector3 } from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { loadModel } from './utils'
+
+const BLADE_MODEL_URL: URL = new URL('../../assets/models/Blade.glb', import.meta.url)
 
 export class Controls {
     // look
@@ -17,8 +20,11 @@ export class Controls {
     decceleration: THREE.Vector3 = new THREE.Vector3(-10, -16, -10)
     acceleration: THREE.Vector3 = new THREE.Vector3(500, 0, 500)
 
+    // blade
+    blade: THREE.Group = new THREE.Group()
+
     // variables for customisation
-    sensitivity: number = 1.0
+    sensitivity: number = 2.0
 
     constructor(camera: THREE.PerspectiveCamera) {
         this.getCamera = () => {
@@ -62,7 +68,7 @@ export class Controls {
                     this.moveLeft = true;
                     break;
             }
-        });
+        })
         document.addEventListener('keyup', (event: KeyboardEvent) => {
             switch (event.code) {
                 case "KeyW":
@@ -78,12 +84,26 @@ export class Controls {
                     this.moveLeft = false;
                     break;
             }
-        });
+        })
     }
 
     activate() {
         // lock cursor to allow look and movement
         document.body.requestPointerLock()
+    }
+
+    async loadAssets(loader: GLTFLoader) {
+        await this.loadBlade(loader)
+    }
+
+    async loadBlade(loader: GLTFLoader) {
+        this.blade = await loadModel(BLADE_MODEL_URL, loader)
+        this.blade.scale.multiplyScalar(15)
+        this.blade.position.set(this.blade.position.x + 15, this.blade.position.y - 2.5, this.blade.position.z - 25)
+        this.blade.rotateZ(-Math.PI / 2)
+        this.blade.rotateY(- Math.PI / 3)
+        this.blade.rotateX(Math.PI)
+        this.getCamera().add(this.blade)
     }
 
     update(delta: number) {
