@@ -5,8 +5,10 @@ export default class MapGenerator {
 
     generate(scene: THREE.Scene, obstacles: any[]) {
 
-        let b = new Building(new THREE.Vector3(20, 0, 0), 5);
-        obstacles.push(b);
+        for (let i = 0; i < 10; i++) {
+            let b = new Building(new THREE.Vector3(20 * i, 0, 0), 3 + Math.floor(Math.random() * 5));
+            obstacles.push(b);
+        }
 
         console.log("generate")
     }
@@ -27,7 +29,7 @@ class Building {
     }
 
     _init() {
-        let pavement = new Pavement(new THREE.Vector3(this.position.x, -0.5, this.position.z));
+        let pavement = new Pavement(new THREE.Vector3(this.position.x, 0, this.position.z)); // originally y was -0.5 not sure why
         this.object.add(pavement.object);
 
         for (let i = 0; i < this.levels; i++) {
@@ -38,8 +40,7 @@ class Building {
     _loadLevel(id: number, offset: number) {
 
         let levelObject = this._getLevelObject(id);
-        // levelObject.position.copy(position);
-        levelObject.position.y = offset;
+        levelObject.position.set(this.position.x, offset, this.position.z);
         this.object.add(levelObject);
 
     }
@@ -90,7 +91,7 @@ class Pavement {
         let geometry = new THREE.BoxGeometry(20, 0.5, 20);
         let material = new THREE.MeshLambertMaterial({ color: 0x1d2430 });
         this.object = new THREE.Mesh(geometry, material);
-
+        this.object.position.copy(this.position);
     }
 
 

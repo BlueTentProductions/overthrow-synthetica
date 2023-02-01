@@ -5,8 +5,8 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 
-import Floor from './floor';
-import Controls from './fps-controls';
+import Floor from './Floor';
+import Controls from './Controls';
 import MapGenerator from './MapGenerator';
 
 let loader = new GLTFLoader();
