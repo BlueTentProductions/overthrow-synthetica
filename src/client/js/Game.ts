@@ -3,9 +3,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 
 import Floor from './floor';
 import Controls from './fps-controls';
+import MapGenerator from './MapGenerator';
 
 let loader = new GLTFLoader();
 
@@ -17,11 +19,12 @@ export default class Game {
     _prevTime: number = performance.now();
     pause = false;
     player: Controls;
+    obstacles = [];
 
     constructor() {
         this._scene = new THREE.Scene();
         this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this._camera.position.y = 20
+        this._camera.position.y = 1.6
         this._camera.position.z = 2
         this._renderer = new THREE.WebGLRenderer();
         this._renderer.setSize(window.innerWidth, window.innerHeight);
@@ -55,19 +58,32 @@ export default class Game {
         let renderPass = new RenderPass(this._scene, this._camera);
         this._composer.addPass(renderPass);
         let bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.3;
-        bloomPass.strength = 1.2;
-        bloomPass.radius = 0.1;
+        bloomPass.threshold = 0.1;
+        bloomPass.strength = 1.3;
+        bloomPass.radius = 0.5;
         this._composer.addPass(bloomPass);
+
+        let smaaPass = new SMAAPass(window.innerWidth * this._renderer.getPixelRatio(), window.innerHeight * this._renderer.getPixelRatio());
+        this._composer.addPass(smaaPass);
     }
 
     _setUpScene() {
-        let sun = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
-        let ambient = new THREE.AmbientLight(0xffffff);
+        let sun = new THREE.HemisphereLight(0x000d56, 0xf08bff, 1);
+        // let ambient = new THREE.AmbientLight(0xffffff);
         this._scene.add(sun);
-        this._scene.add(ambient);
-        this._scene.background = new THREE.Color(0x16111e);
+        // this._scene.add(ambient);
 
+        let generator = new MapGenerator();
+        generator.generate(this._scene, this.obstacles);
+
+        //add all obstacles objects to scene functionally
+        this.obstacles.forEach(obstacle => {
+            this._scene.add(obstacle['object']);
+        });
+
+
+
+        console.log("generation finished")
         let floor = new Floor(1000)
         this._scene.add(floor.mesh)
 
@@ -88,10 +104,6 @@ export default class Game {
 
         this._prevTime = time;
         this._composer?.render();
-
-
-
-        console.log("animate");
     }
 
 

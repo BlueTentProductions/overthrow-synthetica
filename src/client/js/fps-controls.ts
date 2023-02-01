@@ -19,6 +19,7 @@ export default class Controls {
 
     decceleration: THREE.Vector3 = new THREE.Vector3(-10, -16, -10)
     acceleration: THREE.Vector3 = new THREE.Vector3(500, 0, 500)
+    accelSpeed = 0.15;
 
     // blade
     blade: THREE.Group = new THREE.Group()
@@ -103,10 +104,10 @@ export default class Controls {
 
     async loadBlade(loader: GLTFLoader) {
         this.blade = await loadModel(BLADE_MODEL_URL, loader)
-        this.blade.scale.multiplyScalar(15)
-        this.blade.position.set(this.blade.position.x + 15, this.blade.position.y - 2.5, this.blade.position.z - 25)
+        this.blade.scale.multiplyScalar(0.7)
+        this.blade.position.set(this.blade.position.x + 0.9, this.blade.position.y, this.blade.position.z - 1.2)
         this.blade.rotateZ(-Math.PI / 2)
-        this.blade.rotateY(- Math.PI / 3)
+        this.blade.rotateY(- Math.PI / 6)
         this.blade.rotateX(Math.PI)
         this.getCamera().add(this.blade)
     }
@@ -133,8 +134,15 @@ export default class Controls {
         const acceleration: THREE.Vector3 = new THREE.Vector3(0, 0, 0)
 
         // acceleration determined by direction chosen by player, which can only be one out of the two polar opposites
-        acceleration.x = (Number(this.moveRight) - Number(this.moveLeft)) * this.acceleration.x
-        acceleration.z = (Number(this.moveForward) - Number(this.moveBackward)) * this.acceleration.z
+        acceleration.x = (Number(this.moveRight) - Number(this.moveLeft))
+        acceleration.z = (Number(this.moveForward) - Number(this.moveBackward))
+
+        //normalize acceleration to make sure player can't move faster diagonally
+        acceleration.normalize()
+        acceleration.multiply(this.acceleration)
+        acceleration.multiplyScalar(this.accelSpeed)
+
+
 
         acceleration.multiplyScalar(delta)
 
