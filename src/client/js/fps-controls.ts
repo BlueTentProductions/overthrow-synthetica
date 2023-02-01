@@ -2,9 +2,9 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { loadModel } from './utils'
 
-const BLADE_MODEL_URL: URL = new URL('../../assets/models/Blade.glb', import.meta.url)
+const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.meta.url)
 
-export class Controls {
+export default class Controls {
     // look
     activated: boolean = false
     getCamera: Function
@@ -27,10 +27,15 @@ export class Controls {
     sensitivity: number = 2.0
 
     constructor(camera: THREE.PerspectiveCamera) {
+
+        document.addEventListener('click', () => {
+            document.body.requestPointerLock()
+        })
+
         this.getCamera = () => {
             return camera
         }
-        
+
         document.body.addEventListener('mousemove', (event: MouseEvent) => {
             if (!this.activated) return
 
@@ -46,7 +51,7 @@ export class Controls {
 
             camera.quaternion.setFromEuler(euler)
         })
-        
+
         document.addEventListener('pointerlockchange', (event: Event) => {
             // checks if pointerLockElement is the document.body or null, then change the activation correspondingly
             if (document.pointerLockElement === document.body) this.activated = true
@@ -141,12 +146,12 @@ export class Controls {
         forward.y = 0
         forward.normalize()
         forward.multiplyScalar(this.velocity.z * delta)
-        
+
         const right: THREE.Vector3 = (new THREE.Vector3(1, 0, 0)).applyQuaternion(this.getCamera().quaternion)
         right.y = 0
         right.normalize()
         right.multiplyScalar(this.velocity.x * delta)
-        
+
         this.getCamera().position.add(forward).add(right);
     }
 }

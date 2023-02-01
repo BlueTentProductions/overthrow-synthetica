@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-export class Floor {
+export default class Floor {
     geometry: THREE.PlaneGeometry
     material: THREE.MeshBasicMaterial
     mesh: THREE.Mesh
