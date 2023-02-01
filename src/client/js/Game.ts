@@ -59,7 +59,7 @@ export default class Game {
         this._composer.addPass(renderPass);
         let bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
-        bloomPass.strength = 1.3;
+        bloomPass.strength = 0.8;
         bloomPass.radius = 0.5;
         this._composer.addPass(bloomPass);
 
