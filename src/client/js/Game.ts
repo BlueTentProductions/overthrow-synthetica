@@ -23,7 +23,7 @@ export default class Game {
 
     constructor() {
         this._scene = new THREE.Scene();
-        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300);
+        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.8, 1000);
         this._camera.position.y = 1.6
         this._camera.position.z = 2
         this._renderer = new THREE.WebGLRenderer();
@@ -63,8 +63,11 @@ export default class Game {
         bloomPass.radius = 0.5;
         this._composer.addPass(bloomPass);
 
+
+
         let smaaPass = new SMAAPass(window.innerWidth * this._renderer.getPixelRatio(), window.innerHeight * this._renderer.getPixelRatio());
         this._composer.addPass(smaaPass);
+
     }
 
     _setUpScene() {

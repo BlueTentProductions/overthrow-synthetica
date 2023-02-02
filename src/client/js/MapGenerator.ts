@@ -27,7 +27,7 @@ export default class MapGenerator {
                     continue;
                 }
                 this.obstacles[String(newPos)] = true;
-                let height = Math.floor(Math.random() * 4) + 2;
+                let height = Math.floor(Math.random() * 6) + 2;
                 let b = new Building(new THREE.Vector3(newPos[0], 2, newPos[1]), height, rotations[j]);
                 obstacles.push(b);
 
@@ -162,7 +162,15 @@ class Building extends Obstacle {
         let levelObject = new THREE.Object3D();
         var url;
         if (id === 1) {
-            url = new URL(`../../../assets/models/shop-1.glb`, import.meta.url);
+            let variant = Math.floor(Math.random() * 2) + 1;
+            switch (variant) {
+                case 1:
+                    url = new URL(`../../../assets/models/shop-1.glb`, import.meta.url);
+                    break;
+                case 2:
+                    url = new URL(`../../../assets/models/love-hotel.glb`, import.meta.url);
+                    break;
+            }
         } else {
             // let variant be random number between 1 and 3
             let variant = Math.floor(Math.random() * 7) + 1;
