@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { loadModel } from './Utils'
+import { loadModel } from './utils'
 
 const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.meta.url)
 
@@ -20,8 +20,8 @@ export default class Controls {
 
     decceleration: THREE.Vector3 = new THREE.Vector3(-10, -16, -10);
     acceleration: THREE.Vector3 = new THREE.Vector3(500, 0, 500);
-    accelSpeed: number = 0.15;
-    sprintMod: number = 1.5;
+    accelSpeed: number = 0.12;
+    sprintMod: number = 1.8;
 
     // blade
     blade: THREE.Group = new THREE.Group();

@@ -2,23 +2,118 @@ import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
 export default class MapGenerator {
+    roads: number[][] = [];
+
+    //obstacles is a hashmap of all the obstacles in the scene with their position as the key
+    obstacles: any = {};
+
 
     generate(scene: THREE.Scene, obstacles: any[]) {
 
+        this._generateRoadTree();
 
-        let b = new Building(new THREE.Vector3(20, 0, 0), 5, 0);
-        obstacles.push(b);
+        for (let i = 0; i < this.roads.length; i++) {
+            let road = this.roads[i];
 
+            let directions = [[13, 0], [0, 13], [-13, 0], [0, -13]];
+            let rotations = [-Math.PI / 2, Math.PI, Math.PI / 2, 0];
 
-        let b1 = new Building(new THREE.Vector3(20, 0, -13), 3, Math.PI / 2);
-        obstacles.push(b1);
+            for (let j = 0; j < directions.length; j++) {
+                let direction = directions[j];
+                let newPos = [road[0] + direction[0], road[1] + direction[1]];
 
-        let b2 = new Building(new THREE.Vector3(44, 0, 0), 2, 0);
-        obstacles.push(b2);
+                if (this.obstacles[String(newPos)]) {
+                    continue;
+                }
+                this.obstacles[String(newPos)] = true;
+                let height = Math.floor(Math.random() * 4) + 2;
+                let b = new Building(new THREE.Vector3(newPos[0], 2, newPos[1]), height, rotations[j]);
+                obstacles.push(b);
 
-        console.log("generate")
+            }
+        }
     }
 
+    _generateRoadTree() {
+        var explore = [];
+        var roadsLeft = 100;
+        this.roads.push([0, 0]);
+        this.obstacles[String([0, 0])] = true;
+        explore.push([0, 0]);
+
+
+        while (explore.length > 0) {
+            // let current = explore.pop();
+            //let current be first element of explore
+            let current = explore.shift();
+
+
+
+            if (!current) {
+                continue;
+            }
+            if (roadsLeft <= 0) {
+                break;
+            }
+            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
+                let length = Math.floor(Math.random() * 8) + 2;
+                var newPos;
+                for (let i = 1; i < length; i++) {
+                    newPos = [current[0] + i * 13, current[1]];
+                    if (!this.obstacles[String(newPos)]) {
+                        this.roads.push(newPos);
+                        this.obstacles[String(newPos)] = true;
+                        explore.push(newPos);
+                        roadsLeft--;
+                    }
+                }
+                explore.push(newPos);
+
+            }
+            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
+                let length = Math.floor(Math.random() * 8) + 2;
+                var newPos;
+                for (let i = 1; i < length; i++) {
+                    newPos = [current[0] + i * -13, current[1]];
+                    if (!this.obstacles[String(newPos)]) {
+                        this.roads.push(newPos);
+                        this.obstacles[String(newPos)] = true;
+                        explore.push(newPos);
+                        roadsLeft--;
+                    }
+                }
+                explore.push(newPos);
+            }
+            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
+                let length = Math.floor(Math.random() * 8) + 2;
+                var newPos;
+                for (let i = 1; i < length; i++) {
+                    newPos = [current[0], current[1] + i * 13];
+                    if (!this.obstacles[String(newPos)]) {
+                        this.roads.push(newPos);
+                        this.obstacles[String(newPos)] = true;
+                        explore.push(newPos);
+                        roadsLeft--;
+                    }
+                }
+                explore.push(newPos);
+            }
+            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
+                let length = Math.floor(Math.random() * 8) + 2;
+                var newPos;
+                for (let i = 1; i < length; i++) {
+                    newPos = [current[0], current[1] + i * -13];
+                    if (!this.obstacles[String(newPos)]) {
+                        this.roads.push(newPos);
+                        this.obstacles[String(newPos)] = true;
+                        explore.push(newPos);
+                        roadsLeft--;
+                    }
+                }
+                explore.push(newPos);
+            }
+        }
+    }
 }
 
 
@@ -63,16 +158,38 @@ class Building {
         if (id === 1) {
             url = new URL(`../../../assets/models/shop-1.glb`, import.meta.url);
         } else {
-            // let variant be random number between 1 and 2
-            let variant = Math.floor(Math.random() * 2) + 1;
-            console.log(variant)
-
+            // let variant be random number between 1 and 3
+            let variant = Math.floor(Math.random() * 7) + 1;
             switch (variant) {
                 case 1:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
                     break;
                 case 2:
                     url = new URL(`../../../assets/models/apartment-2.glb`, import.meta.url);
+                    break;
+                case 3:
+                    url = new URL(`../../../assets/models/apartment-3.glb`, import.meta.url);
+                    break;
+                case 4:
+                    //blue tek
+                    let advert = Math.floor(Math.random() * 2) + 1;
+                    switch (advert) {
+                        case 1:
+                            url = new URL(`../../../assets/models/apartment-4.glb`, import.meta.url);
+                            break;
+                        case 2:
+                            url = new URL(`../../../assets/models/apartment-7.glb`, import.meta.url);
+                            break;
+                        default:
+                            url = new URL(`../../../assets/models/apartment-4.glb`, import.meta.url);
+                            break;
+                    }
+                    break;
+                case 5:
+                    url = new URL(`../../../assets/models/apartment-5.glb`, import.meta.url);
+                    break;
+                case 6:
+                    url = new URL(`../../../assets/models/apartment-6.glb`, import.meta.url);
                     break;
                 default:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
