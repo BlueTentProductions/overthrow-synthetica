@@ -98,7 +98,7 @@ export default class Game {
         const delta: number = (time - this._prevTime) / 1000
 
         if (!this.pause) {
-            this.player.update(delta)
+            this.player.update(delta, this.obstacles)
         }
 
 

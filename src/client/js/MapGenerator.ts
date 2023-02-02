@@ -1,5 +1,6 @@
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
+import Obstacle from './Obstacle';
 
 export default class MapGenerator {
     roads: number[][] = [];
@@ -36,18 +37,15 @@ export default class MapGenerator {
 
     _generateRoadTree() {
         var explore = [];
-        var roadsLeft = 100;
+        var roadsLeft = 150;
         this.roads.push([0, 0]);
         this.obstacles[String([0, 0])] = true;
         explore.push([0, 0]);
 
-
         while (explore.length > 0) {
-            // let current = explore.pop();
-            //let current be first element of explore
+            console.log(explore)
+
             let current = explore.shift();
-
-
 
             if (!current) {
                 continue;
@@ -55,80 +53,82 @@ export default class MapGenerator {
             if (roadsLeft <= 0) {
                 break;
             }
-            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
-                let length = Math.floor(Math.random() * 8) + 2;
+
+            let threshold = roadsLeft > 100 ? 0.2 : 0.8;
+            if (Math.random() > threshold) {
+                let length = 4;
                 var newPos;
                 for (let i = 1; i < length; i++) {
                     newPos = [current[0] + i * 13, current[1]];
                     if (!this.obstacles[String(newPos)]) {
                         this.roads.push(newPos);
                         this.obstacles[String(newPos)] = true;
-                        explore.push(newPos);
                         roadsLeft--;
                     }
                 }
                 explore.push(newPos);
 
             }
-            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
-                let length = Math.floor(Math.random() * 8) + 2;
+            if (Math.random() > threshold) {
+                let length = Math.floor(Math.random() * 6) + 2;
                 var newPos;
                 for (let i = 1; i < length; i++) {
                     newPos = [current[0] + i * -13, current[1]];
                     if (!this.obstacles[String(newPos)]) {
                         this.roads.push(newPos);
                         this.obstacles[String(newPos)] = true;
-                        explore.push(newPos);
                         roadsLeft--;
                     }
                 }
                 explore.push(newPos);
             }
-            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
-                let length = Math.floor(Math.random() * 8) + 2;
+            if (Math.random() > threshold) {
+                let length = 4;
                 var newPos;
                 for (let i = 1; i < length; i++) {
                     newPos = [current[0], current[1] + i * 13];
                     if (!this.obstacles[String(newPos)]) {
                         this.roads.push(newPos);
                         this.obstacles[String(newPos)] = true;
-                        explore.push(newPos);
                         roadsLeft--;
                     }
                 }
                 explore.push(newPos);
             }
-            if (roadsLeft > 50 ? Math.random() > 0.2 : Math.random() > 0.4) {
-                let length = Math.floor(Math.random() * 8) + 2;
+            if (Math.random() > threshold) {
+                let length = 4;
                 var newPos;
                 for (let i = 1; i < length; i++) {
                     newPos = [current[0], current[1] + i * -13];
                     if (!this.obstacles[String(newPos)]) {
                         this.roads.push(newPos);
                         this.obstacles[String(newPos)] = true;
-                        explore.push(newPos);
                         roadsLeft--;
                     }
                 }
                 explore.push(newPos);
             }
         }
+
     }
 }
 
 
-class Building {
+class Building extends Obstacle {
     object: THREE.Object3D;
     position: THREE.Vector3;
     levels: number;
     rotation: number;
+    collisionBox = new THREE.Box3();
     constructor(position: THREE.Vector3, levels: number, rotation: number) {
+        super();
         this.object = new THREE.Object3D();
         this.position = position;
         this.levels = levels;
         this.rotation = rotation;
         this._init();
         // this._loadLevel(1);
+
     }
 
     _init() {
@@ -139,6 +139,12 @@ class Building {
         for (let i = 0; i < this.levels; i++) {
             this._loadLevel(i + 1, i * 8);
         }
+
+        this.collisionBox.setFromCenterAndSize(this.position, new THREE.Vector3(13, 10, 13));
+
+        //helper to visualise collision box
+        // let helper = new THREE.Box3Helper(this.collisionBox, new THREE.Color(0xff0000));
+        // this.object.add(helper);
     }
 
     _loadLevel(id: number, offset: number) {

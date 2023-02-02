@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { loadModel } from './utils'
+import Obstacle from './Obstacle';
 
 const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.meta.url)
 
@@ -28,6 +29,7 @@ export default class Controls {
 
     // variables for customisation
     sensitivity: number = 2.0;
+    collisionBox: THREE.Box3 = new THREE.Box3();
 
     constructor(camera: THREE.PerspectiveCamera) {
 
@@ -124,10 +126,11 @@ export default class Controls {
         this.getCamera().add(this.blade);
     }
 
-    update(delta: number) {
+    update(delta: number, obstacles: Obstacle[]) {
         this.deccelerate(delta);
         this.accelerate(delta);
-        this.movement(delta);
+        this.collisionBox.setFromCenterAndSize(this.getCamera().position, new THREE.Vector3(0.5, 1.5, 0.5));
+        this.movement(delta, obstacles);
     }
 
     deccelerate(delta: number) {
@@ -158,7 +161,7 @@ export default class Controls {
         this.velocity.add(acceleration);
     }
 
-    movement(delta: number) {
+    movement(delta: number, obstacles: Obstacle[]) {
         const forward: THREE.Vector3 = (new THREE.Vector3(0, 0, -1)).applyQuaternion(this.getCamera().quaternion);
         forward.y = 0;
         forward.normalize();
@@ -169,7 +172,36 @@ export default class Controls {
         right.normalize();
         right.multiplyScalar(this.velocity.x * delta);
 
-        this.getCamera().position.add(forward).add(right);
+
+        let moveVec = new THREE.Vector3();
+        moveVec.add(forward);
+        moveVec.add(right);
+
+        let colBoxX = this.collisionBox.clone();
+        colBoxX.translate(new THREE.Vector3(moveVec.x, 0, 0));
+
+        for (let obstacle of obstacles) {
+            if (colBoxX.intersectsBox(obstacle.collisionBox)) {
+                moveVec.x = 0;
+                break;
+            }
+        }
+
+        let colBoxZ = this.collisionBox.clone();
+        colBoxZ.translate(new THREE.Vector3(0, 0, moveVec.z));
+
+        for (let obstacle of obstacles) {
+            if (colBoxZ.intersectsBox(obstacle.collisionBox)) {
+                moveVec.z = 0;
+                break;
+            }
+        }
+
+
+
+
+
+        this.getCamera().position.add(moveVec);
     }
 
     interact() {
