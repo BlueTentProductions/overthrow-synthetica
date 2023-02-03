@@ -55,13 +55,13 @@ export default class Game {
     _createComposer() {
         this._composer = new EffectComposer(this._renderer);
         console.log(this._scene, this._camera);
-        let renderPass = new RenderPass(this._scene, this._camera);
-        this._composer.addPass(renderPass);
-        let bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.8;
-        bloomPass.radius = 0.5;
-        this._composer.addPass(bloomPass);
+        let _renderPass = new RenderPass(this._scene, this._camera);
+        this._composer.addPass(_renderPass);
+        let _bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        _bloomPass.threshold = 0.1;
+        _bloomPass.strength = 0.8;
+        _bloomPass.radius = 0.5;
+        this._composer.addPass(_bloomPass);
 
 
 
