@@ -162,7 +162,7 @@ class Building extends Obstacle {
         let levelObject = new THREE.Object3D();
         var url;
         if (id === 1) {
-            let variant = Math.floor(Math.random() * 4) + 1;
+            let variant = Math.floor(Math.random() * 6) + 1;
             switch (variant) {
                 case 1:
                     url = new URL(`../../../assets/models/shop-1.glb`, import.meta.url);
@@ -175,6 +175,12 @@ class Building extends Obstacle {
                     break;
                 case 4:
                     url = new URL(`../../../assets/models/ramen-shop.glb`, import.meta.url);
+                    break;
+                case 5:
+                    url = new URL(`../../../assets/models/eatery.glb`, import.meta.url);
+                    break;
+                case 6:
+                    url = new URL(`../../../assets/models/pharmacy.glb`, import.meta.url);
                     break;
             }
         } else {
