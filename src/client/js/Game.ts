@@ -93,9 +93,6 @@ export default class Game {
         this._composer.addPass(bloomPass);
 
 
-        let smaaPass = new SMAAPass(window.innerWidth * this._renderer.getPixelRatio(), window.innerHeight * this._renderer.getPixelRatio());
-        this._composer.addPass(smaaPass);
-
     }
 
     _setUpScene() {
