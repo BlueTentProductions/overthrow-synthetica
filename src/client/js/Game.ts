@@ -6,6 +6,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
+
 import Floor from './floor';
 import Controls from './Controls';
 import MapGenerator from './MapGenerator';
@@ -25,10 +26,10 @@ export default class Game {
 
     constructor() {
         this._scene = new THREE.Scene();
-        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.4, 1000);
+        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.6, 600);
         this._camera.position.y = 1.6
         this._camera.position.z = 2
-        this._renderer = new THREE.WebGLRenderer();
+        this._renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, precision: "mediump", powerPreference: "high-performance", stencil: false });
         this._renderer.setSize(window.innerWidth, window.innerHeight);
         this._renderer.setClearColor(0x16111e);
         this._scene = new THREE.Scene();
@@ -140,6 +141,10 @@ export default class Game {
         // console.log("generation finished")
         let floor = new Floor(700)
         this._scene.add(floor.mesh)
+
+        //add THREE.Fog
+
+
 
 
 

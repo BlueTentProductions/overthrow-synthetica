@@ -43,7 +43,7 @@ export default class MapGenerator {
         explore.push([0, 0]);
 
         while (explore.length > 0) {
-      
+
 
             let current = explore.shift();
 
@@ -188,7 +188,7 @@ class Building extends Obstacle {
             }
         } else {
             // let variant be random number between 1 and 3
-            let variant = Math.floor(Math.random() * 8) + 1;
+            let variant = Math.floor(Math.random() * 9) + 1;
             switch (variant) {
                 case 1:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
@@ -222,6 +222,9 @@ class Building extends Obstacle {
                     break;
                 case 7:
                     url = new URL(`../../../assets/models/apartment-8.glb`, import.meta.url);
+                    break;
+                case 8:
+                    url = new URL(`../../../assets/models/apartment-9.glb`, import.meta.url);
                     break;
                 default:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
