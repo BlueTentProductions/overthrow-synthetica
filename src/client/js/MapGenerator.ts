@@ -43,7 +43,7 @@ export default class MapGenerator {
         explore.push([0, 0]);
 
         while (explore.length > 0) {
-            console.log(explore)
+      
 
             let current = explore.shift();
 
@@ -221,19 +221,7 @@ class Building extends Obstacle {
                     url = new URL(`../../../assets/models/apartment-6.glb`, import.meta.url);
                     break;
                 case 7:
-                    // karaoke / mahjong
-                    let type = Math.floor(Math.random() * 2) + 1;
-                    switch (type) {
-                        case 1:
-                            url = new URL(`../../../assets/models/apartment-8.glb`, import.meta.url);
-                            break;
-                        case 2:
-                            url = new URL(`../../../assets/models/apartment-9.glb`, import.meta.url);
-                            break;
-                        default:
-                            url = new URL(`../../../assets/models/apartment-8.glb`, import.meta.url);
-                            break;
-                    }
+                    url = new URL(`../../../assets/models/apartment-8.glb`, import.meta.url);
                     break;
                 default:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);

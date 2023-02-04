@@ -33,9 +33,6 @@ export default class Controls {
 
     constructor(camera: THREE.PerspectiveCamera) {
 
-        document.addEventListener('click', () => {
-            document.body.requestPointerLock();
-        });
 
         this.getCamera = () => {
             return camera;
@@ -127,6 +124,10 @@ export default class Controls {
     }
 
     update(delta: number, obstacles: Obstacle[]) {
+        if (!this.activated) {
+            this.getCamera().quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), delta / 8));
+            return;
+        }
         this.deccelerate(delta);
         this.accelerate(delta);
         this.collisionBox.setFromCenterAndSize(this.getCamera().position, new THREE.Vector3(0.5, 1.5, 0.5));

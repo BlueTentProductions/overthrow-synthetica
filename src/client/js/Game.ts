@@ -4,6 +4,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 import Floor from './floor';
 import Controls from './Controls';
@@ -20,6 +21,7 @@ export default class Game {
     pause = false;
     player: Controls;
     obstacles = [];
+    active = false;
 
     constructor() {
         this._scene = new THREE.Scene();
@@ -40,6 +42,32 @@ export default class Game {
     }
 
     _init() {
+
+        const manager = new THREE.LoadingManager();
+        manager.onStart = function (url, itemsLoaded, itemsTotal) {
+
+            console.log('Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+
+        };
+
+        manager.onLoad = function () {
+            console.log('Loading complete!');
+
+        };
+
+        document.getElementById("play-button")!.addEventListener("click", () => {
+            this.active = true;
+            document.getElementById("main-menu")!.style.display = "none";
+            //request pointer lock
+            document.body.requestPointerLock();
+        })
+
+        document.addEventListener('click', () => {
+            if (this.active) {
+                document.body.requestPointerLock();
+            }
+        });
+
 
         this._loadAssets();
 
@@ -64,7 +92,6 @@ export default class Game {
         this._composer.addPass(bloomPass);
 
 
-
         let smaaPass = new SMAAPass(window.innerWidth * this._renderer.getPixelRatio(), window.innerHeight * this._renderer.getPixelRatio());
         this._composer.addPass(smaaPass);
 
@@ -78,6 +105,14 @@ export default class Game {
 
         let generator = new MapGenerator();
         generator.generate(this._scene, this.obstacles);
+
+        // const manager = new THREE.LoadingManager();
+        // manager.onStart = function (url, itemsLoaded, itemsTotal) {
+
+        //     console.log('Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+
+        // };
+
 
         //add all obstacles objects to scene functionally
         this.obstacles.forEach(obstacle => {
@@ -97,9 +132,12 @@ export default class Game {
 
         // this._scene.background = texture;
 
+        THREE.DefaultLoadingManager.onLoad = function () {
 
+            document.getElementById("loading")?.remove();
 
-        console.log("generation finished")
+        };
+        // console.log("generation finished")
         let floor = new Floor(700)
         this._scene.add(floor.mesh)
 
