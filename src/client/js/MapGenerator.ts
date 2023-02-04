@@ -186,6 +186,22 @@ class Building extends Obstacle {
                     url = new URL(`../../../assets/models/small-shops-1.glb`, import.meta.url);
                     break;
             }
+        } else if (id === 2) {
+            let variant = Math.floor(Math.random() * 3) + 1;
+            switch (variant) {
+                case 1:
+                    url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
+                    break;
+                case 2:
+                    url = new URL(`../../../assets/models/apartment-2.glb`, import.meta.url);
+                    break;
+                case 3:
+                    url = new URL(`../../../assets/models/apartment-3.glb`, import.meta.url);
+                    break;
+                default:
+                    url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
+                    break;
+            }
         } else {
             // let variant be random number between 1 and 3
             let variant = Math.floor(Math.random() * 9) + 1;
@@ -201,13 +217,16 @@ class Building extends Obstacle {
                     break;
                 case 4:
                     //blue tek
-                    let advert = Math.floor(Math.random() * 2) + 1;
+                    let advert = Math.floor(Math.random() * 3) + 1;
                     switch (advert) {
                         case 1:
                             url = new URL(`../../../assets/models/apartment-4.glb`, import.meta.url);
                             break;
                         case 2:
                             url = new URL(`../../../assets/models/apartment-7.glb`, import.meta.url);
+                            break;
+                        case 3:
+                            url = new URL(`../../../assets/models/omega-day.glb`, import.meta.url);
                             break;
                         default:
                             url = new URL(`../../../assets/models/apartment-4.glb`, import.meta.url);
