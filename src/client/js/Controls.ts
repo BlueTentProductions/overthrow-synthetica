@@ -123,8 +123,8 @@ export default class Controls {
         this.getCamera().add(this.blade);
     }
 
-    update(delta: number, obstacles: Obstacle[]) {
-        if (!this.activated) {
+    update(gameActive: boolean, delta: number, obstacles: Obstacle[]) {
+        if (!this.activated && !gameActive) {
             this.getCamera().quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), delta / 8));
             return;
         }

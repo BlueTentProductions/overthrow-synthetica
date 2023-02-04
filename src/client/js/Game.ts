@@ -142,6 +142,8 @@ export default class Game {
         this._scene.add(floor.mesh)
 
 
+
+
     }
 
 
@@ -152,7 +154,7 @@ export default class Game {
         const delta: number = (time - this._prevTime) / 1000
 
         if (!this.pause) {
-            this.player.update(delta, this.obstacles)
+            this.player.update(this.active, delta, this.obstacles)
         }
 
 
