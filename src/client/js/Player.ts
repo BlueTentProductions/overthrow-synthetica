@@ -53,7 +53,6 @@ export default class Player {
     }
 
     init() {
-        this.crosshair();
         this.eventListeners();
     }
 
@@ -130,23 +129,6 @@ export default class Player {
                     break;
             }
         });
-    }
-    
-    crosshair() {
-        const geometry = new THREE.PlaneGeometry(0.02, 0.002);
-        const material = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xFFFFFF) });
-        const group = new THREE.Group();
-        const horizontal = new THREE.Mesh( geometry, material );
-        horizontal.position.set(0, 0, -0.6);
-
-        const vertical = new THREE.Mesh( geometry, material );
-        vertical.rotateZ( - Math.PI / 2 );
-        vertical.position.set(0, 0, -0.6);
-
-        group.add(horizontal);
-        group.add(vertical);
-
-        this.getCamera().add(group);
     }
 
     activate() {
