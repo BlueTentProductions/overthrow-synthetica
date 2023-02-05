@@ -222,7 +222,7 @@ class Building extends Obstacle {
                     break;
                 case 4:
                     //blue tek
-                    let advert = Math.floor(Math.random() * 3) + 1;
+                    let advert = Math.floor(Math.random() * 4) + 1;
                     switch (advert) {
                         case 1:
                             url = new URL(`../../../assets/models/apartment-4.glb`, import.meta.url);
@@ -233,6 +233,10 @@ class Building extends Obstacle {
                         case 3:
                             url = new URL(`../../../assets/models/omega-day.glb`, import.meta.url);
                             break;
+                        case 4:
+                            url = new URL(`../../../assets/models/apartment-10.glb`, import.meta.url);
+                            break;
+
                         default:
                             url = new URL(`../../../assets/models/apartment-4.glb`, import.meta.url);
                             break;
@@ -253,9 +257,7 @@ class Building extends Obstacle {
                 case 9:
                     url = new URL(`../../../assets/models/synthetica.glb`, import.meta.url);
                     break;
-                case 10:
-                    url = new URL(`../../../assets/models/apartment-10.glb`, import.meta.url);
-                    break;
+
                 default:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
                     break;
