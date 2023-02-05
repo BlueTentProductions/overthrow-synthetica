@@ -210,7 +210,7 @@ class Building extends Obstacle {
             }
         } else {
             // let variant be random number between 1 and 3
-            let variant = Math.floor(Math.random() * 9) + 1;
+            let variant = Math.floor(Math.random() * 10) + 1;
             switch (variant) {
                 case 1:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
@@ -253,6 +253,9 @@ class Building extends Obstacle {
                     break;
                 case 9:
                     url = new URL(`../../../assets/models/synthetica.glb`, import.meta.url);
+                    break;
+                case 10:
+                    url = new URL(`../../../assets/models/apartment-10.glb`, import.meta.url);
                     break;
                 default:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
