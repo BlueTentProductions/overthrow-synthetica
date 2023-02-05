@@ -157,14 +157,11 @@ export default class Game {
 
         this.obstacles.forEach(obstacle => {
             let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - obstacle['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - obstacle['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - obstacle['position']['z'], 2));
-
             if (distance < RENDER_DISTANCE) {
                 this._scene.add(obstacle['object']);
             } else {
                 this._scene.remove(obstacle['object']);
             }
-
-            // this._scene.remove(obstacle['object']);
         });
 
 

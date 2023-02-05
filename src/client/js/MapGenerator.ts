@@ -16,6 +16,7 @@ export default class MapGenerator {
         for (let i = 0; i < this.roads.length; i++) {
             let road = this.roads[i];
 
+            // let directions = [[13, 0], [0, 13], [-13, 0], [0, -13]];
             let directions = [[13, 0], [0, 13], [-13, 0], [0, -13]];
             let rotations = [-Math.PI / 2, Math.PI, Math.PI / 2, 0];
 
@@ -27,7 +28,7 @@ export default class MapGenerator {
                     continue;
                 }
                 this.obstacles[String(newPos)] = true;
-                let height = Math.floor(Math.random() * 5) + 2;
+                let height = Math.floor(Math.random() * 8) + 2;
                 let b = new Building(new THREE.Vector3(newPos[0], 2, newPos[1]), height, rotations[j]);
                 obstacles.push(b);
 
