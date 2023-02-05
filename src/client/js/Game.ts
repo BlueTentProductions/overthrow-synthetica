@@ -8,7 +8,7 @@ import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 
 import Floor from './floor';
-import Controls from './Player';
+import Player from './Player';
 import MapGenerator from './MapGenerator';
 
 let loader = new GLTFLoader();
@@ -22,7 +22,7 @@ export default class Game {
     _composer: EffectComposer | undefined;
     _prevTime: number = performance.now();
     pause = false;
-    player: Controls;
+    player: Player;
     obstacles = [];
     active = false;
 
@@ -36,7 +36,7 @@ export default class Game {
         this._renderer.setClearColor(0x16111e);
         this._scene = new THREE.Scene();
         this._scene.add(this._camera);
-        this.player = new Controls(this._camera);
+        this.player = new Player(this.obstacles, this._camera);
         this._init();
     }
 

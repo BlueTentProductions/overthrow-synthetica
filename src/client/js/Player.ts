@@ -1,6 +1,6 @@
-import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { loadModel } from './utils'
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { loadModel } from './utils';
 import Obstacle from './Obstacle';
 
 const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.meta.url)
@@ -8,7 +8,9 @@ const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.
 export default class Player {
     // look
     activated: boolean = false;
+    getObstacles: Function;
     getCamera: Function;
+    frontRay: THREE.Raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 20);
 
     // movement
     moveForward: boolean = false;
@@ -26,6 +28,8 @@ export default class Player {
 
     // blade
     blade: THREE.Group = new THREE.Group();
+    isSlashing: boolean = false;
+    slashFrame: number = 0;
 
     // variables for customisation
     sensitivity: number = 2.0;
@@ -36,19 +40,30 @@ export default class Player {
     stealth: number = 100;
     maxStealth: number = 100;
 
-    constructor(camera: THREE.PerspectiveCamera) {
+    constructor(obstacles: any, camera: THREE.PerspectiveCamera) {
+        this.getObstacles = () => {
+            return obstacles;
+        }
 
 
         this.getCamera = () => {
             return camera;
         }
+        this.init();
+    }
 
+    init() {
+        this.crosshair();
+        this.eventListeners();
+    }
+
+    eventListeners() {
         document.body.addEventListener('mousemove', (event: MouseEvent) => {
             if (!this.activated) return;
 
             const euler: THREE.Euler = new THREE.Euler(0, 0, 0, 'YXZ'); // ensure rotation is done on Y axis first
 
-            euler.setFromQuaternion(camera.quaternion);
+            euler.setFromQuaternion(this.getCamera().quaternion);
 
             euler.y -= event.movementX * 0.001 * this.sensitivity;
             euler.x -= event.movementY * 0.001 * this.sensitivity;
@@ -56,7 +71,7 @@ export default class Player {
             // ensure that the player can only move the camera for max 180 degrees up and down
             euler.x = THREE.MathUtils.clamp(euler.x, -Math.PI / 2, Math.PI / 2);
 
-            camera.quaternion.setFromEuler(euler);
+            this.getCamera().quaternion.setFromEuler(euler);
         });
 
         document.addEventListener('pointerlockchange', (event: Event) => {
@@ -107,6 +122,31 @@ export default class Player {
                     break;
             }
         });
+
+        document.addEventListener('click', (event: MouseEvent) => {
+            switch (event.button) {
+                case 0:
+                    if (!this.isSlashing) this.isSlashing = true;
+                    break;
+            }
+        });
+    }
+    
+    crosshair() {
+        const geometry = new THREE.PlaneGeometry(0.02, 0.002);
+        const material = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xFFFFFF) });
+        const group = new THREE.Group();
+        const horizontal = new THREE.Mesh( geometry, material );
+        horizontal.position.set(0, 0, -0.6);
+
+        const vertical = new THREE.Mesh( geometry, material );
+        vertical.rotateZ( - Math.PI / 2 );
+        vertical.position.set(0, 0, -0.6);
+
+        group.add(horizontal);
+        group.add(vertical);
+
+        this.getCamera().add(group);
     }
 
     activate() {
@@ -133,10 +173,17 @@ export default class Player {
             this.getCamera().quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), delta / 8));
             return;
         }
+        this.updateRay();
         this.deccelerate(delta);
         this.accelerate(delta);
         this.collisionBox.setFromCenterAndSize(this.getCamera().position, new THREE.Vector3(0.5, 1.5, 0.5));
         this.movement(delta, obstacles);
+        this.slash();
+    }
+
+    updateRay() {
+        this.frontRay.ray.origin.copy(this.getCamera().position);
+        this.frontRay.ray.direction.copy((new THREE.Vector3(0, 0, -1)).applyQuaternion(this.getCamera().quaternion));
     }
 
     deccelerate(delta: number) {
@@ -211,14 +258,33 @@ export default class Player {
             }
         }
 
-
-
-
-
         this.getCamera().position.add(moveVec);
     }
 
+    slash() {
+        if (this.isSlashing) {
+            if (this.slashFrame < 5) {
+                // ...
+                this.slashFrame += 1
+            }
+            else {
+                this.isSlashing = false;
+                this.slashFrame = 0;
+            }
+        }
+    }
+
     interact() {
-        // for (all interactable objects in the scene...)
+        for (let i = 0; i < this.getObstacles().length; i++) {
+            let object: any = this.getObstacles()[i];
+            let intersection: THREE.Vector3 = new THREE.Vector3();
+            if (object.name == 'building') {
+                this.frontRay.ray.intersectBox(object.collisionBox, intersection);
+                if (this.frontRay.ray.origin.distanceTo(intersection) <= 2) {
+                    console.log(this.frontRay.ray.origin.distanceTo(intersection), object, object.name);
+                    break;
+                }
+            }
+        }
     }
 }
