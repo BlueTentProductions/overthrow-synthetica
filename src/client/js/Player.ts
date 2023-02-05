@@ -2,10 +2,11 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { loadModel } from './utils';
 import Obstacle from './Obstacle';
+import Entity from './Entity';
 
 const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.meta.url)
 
-export default class Player {
+export default class Player extends Entity {
     // look
     activated: boolean = false;
     getObstacles: Function;
@@ -40,12 +41,13 @@ export default class Player {
     stealth: number = 100;
     maxStealth: number = 100;
 
+
     constructor(obstacles: any, camera: THREE.PerspectiveCamera) {
+        super();
+
         this.getObstacles = () => {
             return obstacles;
         }
-
-
         this.getCamera = () => {
             return camera;
         }
@@ -150,7 +152,7 @@ export default class Player {
         this.getCamera().add(this.blade);
     }
 
-    update(gameActive: boolean, delta: number, obstacles: Obstacle[]) {
+    move_update(gameActive: boolean, delta: number, obstacles: Obstacle[]) {
         if (!this.activated && !gameActive) {
             this.getCamera().quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), delta / 8));
             return;
@@ -166,6 +168,10 @@ export default class Player {
     updateRay() {
         this.frontRay.ray.origin.copy(this.getCamera().position);
         this.frontRay.ray.direction.copy((new THREE.Vector3(0, 0, -1)).applyQuaternion(this.getCamera().quaternion));
+    }
+
+    getCurrentRoad() {
+        return [Math.floor((this.getCamera().position.x + (13 / 2)) / 13) * 13, Math.floor((this.getCamera().position.z + (13 / 2)) / 13) * 13];
     }
 
     deccelerate(delta: number) {

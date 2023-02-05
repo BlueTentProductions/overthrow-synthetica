@@ -10,6 +10,8 @@ import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 import Floor from './floor';
 import Player from './Player';
 import MapGenerator from './MapGenerator';
+import { Pedestrian } from './Npc';
+import Entity from './Entity';
 
 let loader = new GLTFLoader();
 
@@ -24,6 +26,7 @@ export default class Game {
     pause = false;
     player: Player;
     obstacles = [];
+    entities: Entity[] = [];
     active = false;
 
     constructor() {
@@ -100,25 +103,58 @@ export default class Game {
 
     _setUpScene() {
         let sun = new THREE.HemisphereLight(0x000d56, 0xf08bff, 1);
-        // let ambient = new THREE.AmbientLight(0xffffff);
         this._scene.add(sun);
-        // this._scene.add(ambient);
 
         let generator = new MapGenerator();
         generator.generate(this._scene, this.obstacles);
 
-        // const manager = new THREE.LoadingManager();
-        // manager.onStart = function (url, itemsLoaded, itemsTotal) {
 
-        //     console.log('Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
-
-        // };
-
-
-        //add all obstacles objects to scene functionally
         this.obstacles.forEach(obstacle => {
             this._scene.add(obstacle['object']);
         });
+
+        let roads: number[][] = generator.roads;
+        //form adjacency matrix for roads
+        let adjacencyList: Map<string, number[][]> = new Map();
+        roads.forEach(road => {
+            adjacencyList.set(road.toString(), []);
+        });
+
+        roads.forEach(road => {
+            roads.forEach(otherRoad => {
+                if (road !== otherRoad) {
+                    if (road[0] === otherRoad[0] && Math.abs(road[1] - otherRoad[1]) === 13) {
+                        adjacencyList.get(road.toString())!.push(otherRoad);
+                    }
+                    if (road[1] === otherRoad[1] && Math.abs(road[0] - otherRoad[0]) === 13) {
+                        adjacencyList.get(road.toString())!.push(otherRoad);
+                    }
+                }
+            });
+        });
+
+        console.log(adjacencyList);
+        console.log(adjacencyList.get([0, 0].toString())!);
+
+        let pos = [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]]
+
+        //add pedestrian to entities
+        for (let i = 0; i < 1000; i++) {
+            // let pos 
+            //make position a random road
+            let pos = roads[Math.floor(Math.random() * roads.length)];
+            let pedestrian = new Pedestrian(adjacencyList, pos)
+            this.entities.push(pedestrian);
+        }
+
+        //add pedestrian to scene
+        this.entities.forEach(entity => {
+            this._scene.add(entity['object']);
+        });
+
+
+
+
 
         // const cubeLoader = new THREE.CubeTextureLoader();
         // const texture = cubeLoader.load([
@@ -177,13 +213,28 @@ export default class Game {
             }
         });
 
+        this.entities.forEach(entity => {
+            let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - entity['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - entity['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - entity['position']['z'], 2));
+            if (distance < RENDER_DISTANCE) {
+                this._scene.add(entity['object']);
+            } else {
+                this._scene.remove(entity['object']);
+            }
+        });
+
 
 
         const time: number = performance.now()
         const delta: number = (time - this._prevTime) / 1000
 
         if (!this.pause) {
-            this.player.update(this.active, delta, this.obstacles)
+            if (this.active) {
+                this.entities.forEach(entity => {
+                    entity.update(this.player, delta, this.obstacles);
+                });
+            }
+
+            this.player.move_update(this.active, delta, this.obstacles)
         }
 
 

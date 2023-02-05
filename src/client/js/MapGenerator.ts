@@ -110,7 +110,6 @@ export default class MapGenerator {
                 explore.push(newPos);
             }
         }
-        console.log(this.roads);
 
     }
 }
