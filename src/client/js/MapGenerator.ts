@@ -120,6 +120,7 @@ class Building extends Obstacle {
     levels: number;
     rotation: number;
     collisionBox = new THREE.Box3();
+    name = 'building';
     constructor(position: THREE.Vector3, levels: number, rotation: number) {
         super();
         this.object = new THREE.Object3D();

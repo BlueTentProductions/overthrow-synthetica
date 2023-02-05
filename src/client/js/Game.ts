@@ -13,6 +13,8 @@ import MapGenerator from './MapGenerator';
 
 let loader = new GLTFLoader();
 
+let RENDER_DISTANCE = 100;
+
 export default class Game {
     _scene: THREE.Scene;
     _camera: THREE.PerspectiveCamera
@@ -140,6 +142,7 @@ export default class Game {
         this._scene.add(floor.mesh)
 
         //add THREE.Fog
+        this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE);
 
 
 
@@ -151,6 +154,20 @@ export default class Game {
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
+
+        this.obstacles.forEach(obstacle => {
+            let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - obstacle['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - obstacle['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - obstacle['position']['z'], 2));
+
+            if (distance < RENDER_DISTANCE) {
+                this._scene.add(obstacle['object']);
+            } else {
+                this._scene.remove(obstacle['object']);
+            }
+
+            // this._scene.remove(obstacle['object']);
+        });
+
+
 
         const time: number = performance.now()
         const delta: number = (time - this._prevTime) / 1000
