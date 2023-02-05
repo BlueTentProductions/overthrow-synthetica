@@ -5,7 +5,7 @@ import Obstacle from './Obstacle';
 
 const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.meta.url)
 
-export default class Controls {
+export default class Player {
     // look
     activated: boolean = false;
     getCamera: Function;
@@ -30,6 +30,11 @@ export default class Controls {
     // variables for customisation
     sensitivity: number = 2.0;
     collisionBox: THREE.Box3 = new THREE.Box3();
+
+    health: number = 100;
+    maxHealth: number = 100;
+    stealth: number = 100;
+    maxStealth: number = 100;
 
     constructor(camera: THREE.PerspectiveCamera) {
 
@@ -173,10 +178,18 @@ export default class Controls {
         right.normalize();
         right.multiplyScalar(this.velocity.x * delta);
 
-
         let moveVec = new THREE.Vector3();
         moveVec.add(forward);
         moveVec.add(right);
+
+        if (moveVec.length() > 0.05) {
+            this.stealth -= delta * (this.isSprinting ? 8 : -0.3);
+            if (this.stealth < 0) this.stealth = 0;
+            if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
+        } else if (moveVec.length() <= 0.05) {
+            this.stealth += delta * 3;
+            if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
+        }
 
         let colBoxX = this.collisionBox.clone();
         colBoxX.translate(new THREE.Vector3(moveVec.x, 0, 0));

@@ -135,3 +135,99 @@ body {
     background-position: center;
     text-align: center;
 }
+
+#game-container{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: none;
+}
+
+#crosshair{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    height: 15px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 10px 0px #ffffff;
+
+    /* //create thin elpsis */
+    /* border: 1px solid #ffffff; */
+    /* border-radius: 50%; */
+    /* width: 15px; */
+    
+
+
+
+
+}
+
+#hud-container{
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height: 300px;
+    z-index: 2;
+    /* background-color: #f5a01c; */
+    background: linear-gradient(0deg,  rgba(121,9,74,1) 0%, rgba(0,212,255,0) 100%);
+    opacity: 0.8;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.hud-component{
+    height: 200px;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    color: #ffffff;
+
+    /* create white outline; */
+    border: 6px solid #ffffff;
+    margin-top: 75px;
+    background-color: #b3265e29;
+
+}
+
+.hud-component h1{
+    font-family: 'Eternal';
+    font-size: 20pt;
+    margin-bottom: 0;
+
+}
+
+.hud-wheel {
+  --w:130px;
+  
+  width: var(--w);
+  aspect-ratio: 1;
+    position: relative;
+
+  z-index: 100;
+  display: inline-grid;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  place-content: center;
+  margin: 10px;
+  font-size: 25px;
+  font-weight: bold;
+  font-family: 'Eternal';
+  z-index: 100;
+}
+.hud-wheel:before {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  inset: 0;
+  background: conic-gradient(var(--c) calc(var(--p)*1%),#0000 0);
+  -webkit-mask:radial-gradient(farthest-side,#0000 calc(99% - var(--b)),#000 calc(100% - var(--b)));
+          mask:radial-gradient(farthest-side,#0000 calc(99% - var(--b)),#000 calc(100% - var(--b)));
+}

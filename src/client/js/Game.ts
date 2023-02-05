@@ -8,7 +8,7 @@ import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 
 import Floor from './floor';
-import Controls from './Controls';
+import Controls from './Player';
 import MapGenerator from './MapGenerator';
 
 let loader = new GLTFLoader();
@@ -61,6 +61,7 @@ export default class Game {
         document.getElementById("play-button")!.addEventListener("click", () => {
             this.active = true;
             document.getElementById("main-menu")!.style.display = "none";
+            document.getElementById("game-container")!.style.display = "block";
             //request pointer lock
             document.body.requestPointerLock();
         })
@@ -144,10 +145,22 @@ export default class Game {
         //add THREE.Fog
         this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE);
 
+    }
+
+    updateHUD() {
+
+        let healthWheel = document.getElementById("health-wheel")!
+        let percentage = this.player.health / this.player.maxHealth * 100;
+        healthWheel.setAttribute("style", "--p:" + percentage + ";--b:15px;--c:rgb(255, 255, 255);");
+        percentage = Math.round(percentage);
+        document.getElementById("health-label")!.innerHTML = percentage + "%";
 
 
-
-
+        let stealthWheel = document.getElementById("stealth-wheel")!
+        let stealthPercentage = this.player.stealth / this.player.maxStealth * 100;
+        stealthWheel.setAttribute("style", "--p:" + stealthPercentage + ";--b:15px;--c:rgb(255, 255, 255);");
+        stealthPercentage = Math.round(stealthPercentage);
+        document.getElementById("stealth-label")!.innerHTML = stealthPercentage + "%";
 
     }
 
@@ -176,6 +189,7 @@ export default class Game {
 
         this._prevTime = time;
         this._composer?.render();
+        this.updateHUD();
     }
 
 

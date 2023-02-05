@@ -38,7 +38,7 @@ export default class MapGenerator {
 
     _generateRoadTree() {
         var explore = [];
-        var roadsLeft = 150;
+        var roadsLeft = 200;
         this.roads.push([0, 0]);
         this.obstacles[String([0, 0])] = true;
         explore.push([0, 0]);
@@ -55,7 +55,7 @@ export default class MapGenerator {
                 break;
             }
 
-            let threshold = roadsLeft > 100 ? 0.2 : 0.8;
+            let threshold = roadsLeft > 180 ? 0.0 : roadsLeft > 100 ? 0.4 : 0.3;
             if (Math.random() > threshold) {
                 let length = 4;
                 var newPos;
@@ -110,6 +110,7 @@ export default class MapGenerator {
                 explore.push(newPos);
             }
         }
+        console.log(this.roads);
 
     }
 }
@@ -164,7 +165,7 @@ class Building extends Obstacle {
         let levelObject = new THREE.Object3D();
         var url;
         if (id === 1) {
-            let variant = Math.floor(Math.random() * 7) + 1;
+            let variant = Math.floor(Math.random() * 8) + 1;
             switch (variant) {
                 case 1:
                     url = new URL(`../../../assets/models/shop-1.glb`, import.meta.url);
@@ -186,6 +187,9 @@ class Building extends Obstacle {
                     break;
                 case 7:
                     url = new URL(`../../../assets/models/small-shops-1.glb`, import.meta.url);
+                    break;
+                case 8:
+                    url = new URL(`../../../assets/models/bank.glb`, import.meta.url);
                     break;
             }
         } else if (id === 2) {
@@ -246,6 +250,9 @@ class Building extends Obstacle {
                     break;
                 case 8:
                     url = new URL(`../../../assets/models/apartment-9.glb`, import.meta.url);
+                    break;
+                case 9:
+                    url = new URL(`../../../assets/models/synthetica.glb`, import.meta.url);
                     break;
                 default:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
