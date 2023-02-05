@@ -19,8 +19,10 @@ class NPC extends Entity {
 
 class Pedestrian extends NPC {
     _walkDirection: number[];
-    _walkSpeed = Math.random() * 3 + 0.5;
+    _walkSpeed = Math.random() * 2 + 0.5;
     _directionChangeTime = 0;
+    _mixer: any = undefined;
+    _animations: THREE.AnimationClip[] = [];
     constructor(map: Map<string, number[][]>, startRoad: number[]) {
         super(map, startRoad);
         let dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -67,14 +69,36 @@ class Pedestrian extends NPC {
 
         loader.load(url.href, (gltf) => {
             gltf.scene.scale.set(0.12, 0.12, 0.12);
+            this._mixer = new THREE.AnimationMixer(gltf.scene);
+
+            this._animations = gltf.animations;
+
+            //replace material
+            gltf.scene.traverse((child) => {
+                if (child instanceof THREE.Mesh) {
+                    child.material = new THREE.MeshBasicMaterial({ color: 0x050008 });
+                }
+            });
+
+            // this._mixer.clipAction(this._animations[0]).play();
+            //play the first animation at walk speed
+            this._mixer.clipAction(this._animations[0]).setDuration(1 / this._walkSpeed).play();
+
+
             this.object.add(gltf.scene);
         });
+
 
         this.object.position.copy(this.position);
     }
 
 
     update(player: Player, delta: number, obstacles: Obstacle[]): void {
+
+        if (this._mixer !== undefined) {
+            this._mixer.update(delta);
+        }
+
         this._currentRoad = this.getCurrentRoad();
         while (!this._getDirection(delta)) {
             this._respawn(player);
