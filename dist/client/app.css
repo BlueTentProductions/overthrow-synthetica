@@ -152,17 +152,22 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
-    height: 15px;
+    height: 60px;
     aspect-ratio: 1/1;
-    border-radius: 50%;
+    /* border-radius: 50%;
     background-color: #ffffff;
-    box-shadow: 0px 0px 10px 0px #ffffff;
+    box-shadow: 0px 0px 10px 0px #ffffff; */
+
+    background-image: url(./slash.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 
     /* //create thin elpsis */
     /* border: 1px solid #ffffff; */
     /* border-radius: 50%; */
     /* width: 15px; */
-    
+
 
 
 

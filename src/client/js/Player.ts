@@ -29,6 +29,7 @@ export default class Player extends Entity {
 
     // blade
     blade: THREE.Group = new THREE.Group();
+    bladeAngle = 0;
     isSlashing: boolean = false;
     slashFrame: number = 0;
 
@@ -59,6 +60,27 @@ export default class Player extends Entity {
     }
 
     eventListeners() {
+
+
+        //add scroll listener
+        document.addEventListener('wheel', (event: WheelEvent) => {
+            if (!this.activated) return;
+
+            if (event.deltaY > 0) {
+                this.bladeAngle += 0.1;
+            } else {
+                this.bladeAngle -= 0.1;
+            }
+
+            if (this.bladeAngle > 1) this.bladeAngle = 1;
+            if (this.bladeAngle < -1) this.bladeAngle = -1;
+
+            console.log(this.bladeAngle)
+
+            document.getElementById("crosshair")!.style.transform = `translate(-50%, -50%) rotate(${this.bladeAngle}rad) `;
+
+        });
+
         document.body.addEventListener('mousemove', (event: MouseEvent) => {
             if (!this.activated) return;
 
