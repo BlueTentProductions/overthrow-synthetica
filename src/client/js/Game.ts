@@ -31,7 +31,7 @@ export default class Game {
 
     constructor() {
         this._scene = new THREE.Scene();
-        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 600);
+        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 600);
         this._camera.position.y = 1.6
         this._camera.position.z = 2
         this._renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, precision: "mediump", powerPreference: "high-performance", stencil: false });
@@ -43,8 +43,8 @@ export default class Game {
         this._init();
     }
 
-    async _loadAssets() {
-        await this.player.loadAssets(loader)
+    _loadAssets() {
+        this.player.loadAssets(loader)
     }
 
     _init() {
@@ -139,13 +139,13 @@ export default class Game {
         let pos = [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]]
 
         //add pedestrian to entities
-        for (let i = 0; i < 1000; i++) {
-            // let pos 
-            //make position a random road
-            let pos = roads[Math.floor(Math.random() * roads.length)];
-            let pedestrian = new Pedestrian(adjacencyList, pos)
-            this.entities.push(pedestrian);
-        }
+        // for (let i = 0; i < 1000; i++) {
+        //     // let pos 
+        //     //make position a random road
+        //     let pos = roads[Math.floor(Math.random() * roads.length)];
+        //     let pedestrian = new Pedestrian(adjacencyList, pos)
+        //     this.entities.push(pedestrian);
+        // }
 
         //add pedestrian to scene
         this.entities.forEach(entity => {
@@ -235,6 +235,7 @@ export default class Game {
             }
 
             this.player.move_update(this.active, delta, this.obstacles)
+            this.player.update(this.player, delta, this.obstacles);
         }
 
 
