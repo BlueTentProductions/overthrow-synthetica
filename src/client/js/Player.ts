@@ -4,7 +4,7 @@ import { loadModel } from './utils';
 import Obstacle from './Obstacle';
 import Entity from './Entity';
 
-const BLADE_MODEL_URL: URL = new URL('../../../assets/models/Blade.glb', import.meta.url)
+const BLADE_MODEL_URL: URL = new URL('../../../assets/models/new-blade.glb', import.meta.url)
 
 export default class Player extends Entity {
     // look
@@ -29,7 +29,12 @@ export default class Player extends Entity {
 
     // blade
     blade: THREE.Group = new THREE.Group();
+    bladeDefaultPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+    bladeDefaultRotation: THREE.Euler = new THREE.Euler(0, 0, 0);
+    bladeBounceTimer: number = 0;
+    bladeAnimation: THREE.AnimationClip[] = [];
     bladeAngle = 0;
+    _slashTimer = 0;
     isSlashing: boolean = false;
     slashFrame: number = 0;
 
@@ -41,6 +46,8 @@ export default class Player extends Entity {
     maxHealth: number = 100;
     stealth: number = 100;
     maxStealth: number = 100;
+
+    _bladeMixer: any = undefined;
 
 
     constructor(obstacles: any, camera: THREE.PerspectiveCamera) {
@@ -75,7 +82,8 @@ export default class Player extends Entity {
             if (this.bladeAngle > 1) this.bladeAngle = 1;
             if (this.bladeAngle < -1) this.bladeAngle = -1;
 
-            console.log(this.bladeAngle)
+            this.blade.position.setX(this.bladeDefaultPosition.x - this.bladeAngle * 0.3);
+            this.blade.rotation.set(this.bladeDefaultRotation.x, this.bladeDefaultRotation.y, this.bladeDefaultRotation.z + this.bladeAngle);
 
             document.getElementById("crosshair")!.style.transform = `translate(-50%, -50%) rotate(${this.bladeAngle}rad) `;
 
@@ -143,6 +151,7 @@ export default class Player extends Entity {
         document.addEventListener('click', (event: MouseEvent) => {
             switch (event.button) {
                 case 0:
+                    console.log("left click")
                     if (!this.isSlashing) this.isSlashing = true;
                     break;
             }
@@ -157,18 +166,77 @@ export default class Player extends Entity {
         this.activated = false;
     }
 
-    async loadAssets(loader: GLTFLoader) {
-        await this.loadBlade(loader);
+    loadAssets(loader: GLTFLoader) {
+        this.loadBlade(loader);
     }
 
-    async loadBlade(loader: GLTFLoader) {
-        this.blade = await loadModel(BLADE_MODEL_URL, loader);
-        this.blade.scale.multiplyScalar(0.7);
-        this.blade.position.set(this.blade.position.x + 0.9, this.blade.position.y, this.blade.position.z - 2.2);
-        this.blade.rotateZ(-Math.PI / 2);
-        this.blade.rotateY(- Math.PI / 6);
-        this.blade.rotateX(Math.PI);
+    loadBlade(loade: GLTFLoader) {
+
+        let loader = new GLTFLoader();
+
+        loader.load(BLADE_MODEL_URL.href, (gltf) => {
+            this.blade.add(gltf.scene);
+            this._bladeMixer = new THREE.AnimationMixer(gltf.scene);
+            this.bladeAnimation = gltf.animations;
+
+            //make animation not loop
+            this._bladeMixer.clipAction(this.bladeAnimation[0]).setLoop(THREE.LoopOnce, 1);
+
+
+
+        });
+
+
+
+
+
+
+
+        this.blade.scale.multiplyScalar(0.6);
+        this.blade.position.set(this.blade.position.x + 0.1, this.blade.position.y - 0.3, this.blade.position.z - 0.1);
+        this.bladeDefaultPosition = this.blade.position.clone();
+
+        //add rotation to x
+        // this.blade.rotateZ(-Math.PI / 2);
+        // this.blade.rotateY(- Math.PI / 8);
+        // this.blade.rotateX(Math.PI);
+        this.blade.rotateY(Math.PI);
+        this.bladeDefaultRotation = this.blade.rotation.clone();
         this.getCamera().add(this.blade);
+    }
+
+    update(player: Player, delta: number, obstacles: Obstacle[]) {
+        // console.log(this.isSlashing);
+        // if (this.isSlashing) {
+        //     this._bladeMixer.clipAction(this.bladeAnimation[0]).play();
+        //     this.isSlashing = false;
+        // } else {
+        //     this._bladeMixer.clipAction(this.bladeAnimation[0]).stop();
+        // }
+
+        //play slash animation once and then stop
+
+
+
+
+        if (this.isSlashing) {
+            this._bladeMixer.clipAction(this.bladeAnimation[0]).play();
+            this._slashTimer += delta;
+        } else {
+            this._bladeMixer.clipAction(this.bladeAnimation[0]).stop();
+        }
+
+
+        if (this._slashTimer > 1) {
+            this._slashTimer = 0;
+            this.isSlashing = false;
+        }
+
+
+        if (this._bladeMixer) this._bladeMixer.update(delta);
+
+        // console.log(this.isSlashing);
+
     }
 
     move_update(gameActive: boolean, delta: number, obstacles: Obstacle[]) {
@@ -181,7 +249,7 @@ export default class Player extends Entity {
         this.accelerate(delta);
         this.collisionBox.setFromCenterAndSize(this.getCamera().position, new THREE.Vector3(0.5, 1.5, 0.5));
         this.movement(delta, obstacles);
-        this.slash();
+
     }
 
     updateRay() {
@@ -237,13 +305,18 @@ export default class Player extends Entity {
         moveVec.add(right);
 
         if (moveVec.length() > 0.05) {
-            this.stealth -= delta * (this.isSprinting ? 8 : -0.3);
+            this.stealth -= delta * (this.isSprinting ? 8 : -0.6);
             if (this.stealth < 0) this.stealth = 0;
             if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
+            this.bladeBounceTimer += delta * 3;
+
         } else if (moveVec.length() <= 0.05) {
-            this.stealth += delta * 3;
+            this.stealth += delta * 4;
             if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
+            this.bladeBounceTimer += delta;
         }
+
+        this.blade.position.setY(this.bladeDefaultPosition.y + Math.sin(this.bladeBounceTimer) * 0.03 - Math.abs(this.bladeAngle) * 0.2);
 
         let colBoxX = this.collisionBox.clone();
         colBoxX.translate(new THREE.Vector3(moveVec.x, 0, 0));
@@ -269,16 +342,9 @@ export default class Player extends Entity {
     }
 
     slash() {
-        if (this.isSlashing) {
-            if (this.slashFrame < 5) {
-                // ...
-                this.slashFrame += 1
-            }
-            else {
-                this.isSlashing = false;
-                this.slashFrame = 0;
-            }
-        }
+        this.isSlashing = true;
+
+
     }
 
     interact() {
