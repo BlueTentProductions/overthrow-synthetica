@@ -151,13 +151,13 @@ export default class Game {
         let pos = [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]]
 
         //add pedestrian to entities
-        // for (let i = 0; i < 1000; i++) {
-        //     // let pos 
-        //     //make position a random road
-        //     let pos = roads[Math.floor(Math.random() * roads.length)];
-        //     let pedestrian = new Pedestrian(adjacencyList, pos)
-        //     this.entities.push(pedestrian);
-        // }
+        for (let i = 0; i < 10; i++) {
+            // let pos 
+            //make position a random road
+            let pos = roads[Math.floor(Math.random() * roads.length)];
+            let pedestrian = new Pedestrian(adjacencyList, pos)
+            this.entities.push(pedestrian);
+        }
 
         //add pedestrian to scene
         this.entities.forEach(entity => {
@@ -191,7 +191,7 @@ export default class Game {
         this._scene.add(floor.mesh)
 
         //add THREE.Fog
-        this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE);
+        this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE * 9/10);
 
     }
 
@@ -203,17 +203,38 @@ export default class Game {
     }
 
     updateHUD() {
-
+        // health
         let healthWheel = document.getElementById("health-wheel")!
         let percentage = this.player.health / this.player.maxHealth * 100;
-        healthWheel.setAttribute("style", "--p:" + percentage + ";--b:15px;--c:rgb(255, 255, 255);");
+        let healthWheelColor = "rgb(255, 255, 255)";
+
+        // health wheel color for indicating low health
+        if (percentage < 40) healthWheelColor = "rgb(202, 11, 0)";
+        else healthWheelColor = "rgb(255, 255, 255)";
+
+        healthWheel.setAttribute("style", "--p:" + percentage + ";--b:15px;--c:" + healthWheelColor + ";");
         percentage = Math.round(percentage);
         document.getElementById("health-label")!.innerHTML = percentage + "%";
 
-
+        // stealth
         let stealthWheel = document.getElementById("stealth-wheel")!
         let stealthPercentage = this.player.stealth / this.player.maxStealth * 100;
-        stealthWheel.setAttribute("style", "--p:" + stealthPercentage + ";--b:15px;--c:rgb(255, 255, 255);");
+        let stealthWheelColor = "rgb(255, 255, 255)";
+
+        // stealth wheel colors for detection
+        switch (this.player.detection) {
+            case 1:
+                stealthWheelColor = "rgb(255, 255, 255)";
+                break;
+            case 2:
+                stealthWheelColor = "rgb(238, 210, 2)";
+                break;
+            case 3:
+                stealthWheelColor = "rgb(202, 11, 0)";
+                break;
+        }
+
+        stealthWheel.setAttribute("style", "--p:" + stealthPercentage + ";--b:15px;--c:" + stealthWheelColor + ";");
         stealthPercentage = Math.round(stealthPercentage);
         document.getElementById("stealth-label")!.innerHTML = stealthPercentage + "%";
 

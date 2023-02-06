@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { loadModel } from './utils';
 import Obstacle from './Obstacle';
 import Entity from './Entity';
 
@@ -42,10 +41,18 @@ export default class Player extends Entity {
     sensitivity: number = 2.0;
     collisionBox: THREE.Box3 = new THREE.Box3();
 
+    // health
     health: number = 100;
     maxHealth: number = 100;
+
+    // stealth
     stealth: number = 100;
     maxStealth: number = 100;
+    stealthCD: number = 100;
+    maxStealthCD: number = 100;
+    detectionRaised: boolean = false;
+    detection: number = 1;
+    maxDetection: number = 3;
 
     _bladeMixer: any = undefined;
 
@@ -304,17 +311,7 @@ export default class Player extends Entity {
         moveVec.add(forward);
         moveVec.add(right);
 
-        if (moveVec.length() > 0.05) {
-            this.stealth -= delta * (this.isSprinting ? 8 : -0.6);
-            if (this.stealth < 0) this.stealth = 0;
-            if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
-            this.bladeBounceTimer += delta * 3;
-
-        } else if (moveVec.length() <= 0.05) {
-            this.stealth += delta * 4;
-            if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
-            this.bladeBounceTimer += delta;
-        }
+        this.updateStealth(delta, moveVec);
 
         this.blade.position.setY(this.bladeDefaultPosition.y + Math.sin(this.bladeBounceTimer) * 0.03 - Math.abs(this.bladeAngle) * 0.2);
 
@@ -339,6 +336,37 @@ export default class Player extends Entity {
         }
 
         this.getCamera().position.add(moveVec);
+    }
+
+    updateStealth(delta: number, moveVec: THREE.Vector3) {
+        // stealth function so its more organised
+
+        let reductionModifier = (1 + (this.detection - 1) * 0.5);
+
+        // sprinting will cause stealth to be lowered, and need to wait for a bit before starting to regenerate
+        // && moveforward to make sure its actually sprinting not just pressing shift
+        if (this.isSprinting && this.moveForward) {
+            this.stealthCD = 50;
+            this.stealth -= delta * reductionModifier * 8;
+        }
+
+        // stealth regeneration & cooldown regeneration
+        if (this.stealthCD >= this.maxStealthCD) this.stealth += delta * (moveVec.length() > 0.05 ? 0.3: 3);
+        else this.stealthCD += 1;
+
+        // if stealth is broken, then detection meter will increase
+        if (this.stealth < 0) {
+            if (!this.detectionRaised) {
+                this.detectionRaised = true;
+                if (this.detection < this.maxDetection) this.detection += 1;
+            }
+        } else this.detectionRaised = false;
+        
+        // stealth recovers slower if goes under 0, and max -10
+        if (this.stealth < -10) this.stealth = -10;
+
+        // cannot go over max stealth
+        if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
     }
 
     slash() {

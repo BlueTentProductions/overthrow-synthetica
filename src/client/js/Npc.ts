@@ -23,6 +23,7 @@ class Pedestrian extends NPC {
     _directionChangeTime = 0;
     _mixer: any = undefined;
     _animations: THREE.AnimationClip[] = [];
+    scared: boolean = false;
     constructor(map: Map<string, number[][]>, startRoad: number[]) {
         super(map, startRoad);
         let dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -112,10 +113,11 @@ class Pedestrian extends NPC {
         this.object.position.copy(this.position);
 
         let distance = this.position.distanceTo(player.getCamera().position);
-        // if (distance > 200) {
-        //     console.log("distance:" + distance);
-        //     this._respawn(player);
-        // }
+        if (distance < 10 && player.stealth <= 0) {
+            console.log("distance:" + distance, "wah!");
+            this.scared = true;
+            // this._respawn(player);
+        }
     }
 
     _respawn(player: Player) {
