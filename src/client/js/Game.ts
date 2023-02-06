@@ -31,7 +31,7 @@ export default class Game {
 
     constructor() {
         this._scene = new THREE.Scene();
-        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.6, 600);
+        this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 600);
         this._camera.position.y = 1.6
         this._camera.position.z = 2
         this._renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, precision: "mediump", powerPreference: "high-performance", stencil: false });

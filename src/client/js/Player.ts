@@ -29,6 +29,9 @@ export default class Player extends Entity {
 
     // blade
     blade: THREE.Group = new THREE.Group();
+    bladeDefaultPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+    bladeDefaultRotation: THREE.Euler = new THREE.Euler(0, 0, 0);
+    bladeBounceTimer: number = 0;
     bladeAngle = 0;
     isSlashing: boolean = false;
     slashFrame: number = 0;
@@ -76,6 +79,9 @@ export default class Player extends Entity {
             if (this.bladeAngle < -1) this.bladeAngle = -1;
 
             console.log(this.bladeAngle)
+
+            this.blade.position.setX(this.bladeDefaultPosition.x + this.bladeAngle * 0.3);
+            this.blade.rotation.set(this.bladeDefaultRotation.x, this.bladeDefaultRotation.y, this.bladeDefaultRotation.z + this.bladeAngle * 0.4);
 
             document.getElementById("crosshair")!.style.transform = `translate(-50%, -50%) rotate(${this.bladeAngle}rad) `;
 
@@ -166,11 +172,15 @@ export default class Player extends Entity {
 
     async loadBlade(loader: GLTFLoader) {
         this.blade = await loadModel(BLADE_MODEL_URL, loader);
-        this.blade.scale.multiplyScalar(0.7);
-        this.blade.position.set(this.blade.position.x + 0.9, this.blade.position.y, this.blade.position.z - 2.2);
+        this.blade.scale.multiplyScalar(0.6);
+        this.blade.position.set(this.blade.position.x + 0.1, this.blade.position.y + 0.5, this.blade.position.z - 0.9);
+        this.bladeDefaultPosition = this.blade.position.clone();
+
+        //add rotation to x
         this.blade.rotateZ(-Math.PI / 2);
-        this.blade.rotateY(- Math.PI / 6);
+        this.blade.rotateY(- Math.PI / 8);
         this.blade.rotateX(Math.PI);
+        this.bladeDefaultRotation = this.blade.rotation.clone();
         this.getCamera().add(this.blade);
     }
 
@@ -243,10 +253,15 @@ export default class Player extends Entity {
             this.stealth -= delta * (this.isSprinting ? 8 : -0.3);
             if (this.stealth < 0) this.stealth = 0;
             if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
+            this.bladeBounceTimer += delta * 3;
+
         } else if (moveVec.length() <= 0.05) {
             this.stealth += delta * 3;
             if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
+            this.bladeBounceTimer += delta;
         }
+
+        this.blade.position.setY(this.bladeDefaultPosition.y + Math.sin(this.bladeBounceTimer) * 0.03);
 
         let colBoxX = this.collisionBox.clone();
         colBoxX.translate(new THREE.Vector3(moveVec.x, 0, 0));
