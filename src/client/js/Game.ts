@@ -62,19 +62,31 @@ export default class Game {
         };
 
         document.getElementById("play-button")!.addEventListener("click", () => {
+            this.pause = false;
             this.active = true;
             document.getElementById("main-menu")!.style.display = "none";
+            document.getElementById("play-button")!.style.display = "none";
             document.getElementById("game-container")!.style.display = "block";
             //request pointer lock
             document.body.requestPointerLock();
-        })
-
-        document.addEventListener('click', () => {
-            if (this.active) {
-                document.body.requestPointerLock();
-            }
+            this.player.activate();
         });
 
+        document.addEventListener('pointerlockchange', (event: Event) => {
+            if (document.pointerLockElement === document.body) this.pause = false;
+            else {
+                this.pause = true;
+                // theres a 1 second time window for the request, so after pausing, player must wait at least 1 second before being able to click resume
+                document.getElementById("main-menu")!.style.display = "block";
+                document.getElementById("play-button")!.style.display = "none";
+                document.getElementById("game-container")!.style.display = "none";
+                setTimeout(() => {
+                    document.getElementById("play-button")!.style.display = "block";
+                    document.getElementById("play-button")!.children[0].innerHTML = "(繼續)";
+                    document.getElementById("play-button")!.children[1].innerHTML = "RESUME";
+                }, 1000);
+            }
+        });
 
         this._loadAssets();
 
@@ -183,6 +195,13 @@ export default class Game {
 
     }
 
+    updatePause() {
+        if (this.pause) {
+            this.player.deactivate();
+            this.active = false;
+        }
+    }
+
     updateHUD() {
 
         let healthWheel = document.getElementById("health-wheel")!
@@ -203,6 +222,8 @@ export default class Game {
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
+
+        this.updatePause()
 
         this.obstacles.forEach(obstacle => {
             let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - obstacle['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - obstacle['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - obstacle['position']['z'], 2));
