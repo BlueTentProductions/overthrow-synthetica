@@ -1,1 +1,3 @@
 node_modules/
+dist/client/*.glb
+dist/client/bundle.js
