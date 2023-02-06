@@ -215,7 +215,7 @@ export default class Game {
 
         this.entities.forEach(entity => {
             let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - entity['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - entity['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - entity['position']['z'], 2));
-            if (distance < RENDER_DISTANCE) {
+            if (distance < RENDER_DISTANCE / 2) {
                 this._scene.add(entity['object']);
             } else {
                 this._scene.remove(entity['object']);
