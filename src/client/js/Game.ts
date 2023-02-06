@@ -151,7 +151,9 @@ export default class Game {
         let pos = [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]]
 
         //add pedestrian to entities
+
         for (let i = 0; i < 10; i++) {
+
             // let pos 
             //make position a random road
             let pos = roads[Math.floor(Math.random() * roads.length)];
@@ -191,7 +193,7 @@ export default class Game {
         this._scene.add(floor.mesh)
 
         //add THREE.Fog
-        this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE * 9/10);
+        this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE * 9 / 10);
 
     }
 
