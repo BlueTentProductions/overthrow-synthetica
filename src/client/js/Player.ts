@@ -97,12 +97,6 @@ export default class Player extends Entity {
             this.getCamera().quaternion.setFromEuler(euler);
         });
 
-        document.addEventListener('pointerlockchange', (event: Event) => {
-            // checks if pointerLockElement is the document.body or null, then change the activation correspondingly
-            if (document.pointerLockElement === document.body) this.activated = true;
-            else this.activated = false;
-        });
-
         document.addEventListener('keydown', (event: KeyboardEvent) => {
             switch (event.code) {
                 case "KeyW":
@@ -156,8 +150,11 @@ export default class Player extends Entity {
     }
 
     activate() {
-        // lock cursor to allow look and movement
-        document.body.requestPointerLock();
+        this.activated = true;
+    }
+
+    deactivate() {
+        this.activated = false;
     }
 
     async loadAssets(loader: GLTFLoader) {
