@@ -167,7 +167,7 @@ export default class Player extends Entity {
     async loadBlade(loader: GLTFLoader) {
         this.blade = await loadModel(BLADE_MODEL_URL, loader);
         this.blade.scale.multiplyScalar(0.7);
-        this.blade.position.set(this.blade.position.x + 0.9, this.blade.position.y, this.blade.position.z - 1.2);
+        this.blade.position.set(this.blade.position.x + 0.9, this.blade.position.y, this.blade.position.z - 2.2);
         this.blade.rotateZ(-Math.PI / 2);
         this.blade.rotateY(- Math.PI / 6);
         this.blade.rotateX(Math.PI);
