@@ -217,6 +217,9 @@ export default class Game {
         //add THREE.Fog
         this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE * 9 / 10);
 
+        // for (let obstacle of this.obstacles) {
+        //     console.log(obstacle['collisionBox']['min'], obstacle['collisionBox']['max'])
+        // }
     }
 
     updatePause() {
@@ -260,7 +263,9 @@ export default class Game {
 
         stealthWheel.setAttribute("style", "--p:" + stealthPercentage + ";--b:15px;--c:" + stealthWheelColor + ";");
         stealthPercentage = Math.round(stealthPercentage);
-        document.getElementById("stealth-label")!.innerHTML = stealthPercentage + "%";
+        if (stealthPercentage < -10) document.getElementById("stealth-label")!.innerHTML = "&#x26A0;";
+        else if (stealthPercentage < 0) document.getElementById("stealth-label")!.innerHTML = "&#x1F441;";
+        else document.getElementById("stealth-label")!.innerHTML = stealthPercentage + "%";
 
     }
 

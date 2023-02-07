@@ -6,6 +6,8 @@ import Entity from './Entity';
 import Player from './Player';
 import Laser from './Laser';
 
+const TOTAL_SNIPERS = 5;
+
 export default class MapGenerator {
     roads: number[][] = [];
 
@@ -16,14 +18,6 @@ export default class MapGenerator {
     generate(scene: THREE.Scene, obstacles: any[], entities: any[]) {
 
         this._generateRoadTree();
-
-        let sniperInds: number[] = [];
-
-        let totalBuildings = (this.roads.length * 4);
-        while (sniperInds.length < 4) {
-            let rand = Math.floor(Math.random() * totalBuildings);
-            if (!sniperInds.includes(rand)) sniperInds.push(rand);
-        }
 
         for (let i = 0; i < this.roads.length; i++) {
             let road = this.roads[i];
@@ -42,17 +36,27 @@ export default class MapGenerator {
                 this.obstacles[String(newPos)] = true;
                 let height = Math.floor(Math.random() * 8) + 2;
 
-                let hasSniper: boolean = false;
-                if (sniperInds.includes(i * this.roads.length + j)) hasSniper = true;
-                let b = new Building(new THREE.Vector3(newPos[0], 2, newPos[1]), height, rotations[j], hasSniper);
+                let b = new Building(new THREE.Vector3(newPos[0], 2, newPos[1]), height, rotations[j]);
 
-                // place snipers
-                if (b.sniper != 0) {
-                    let p = new Sniper(new Vector3(b.position.x, b.sniper * 8, b.position.z));
-                    entities.push(p);
-                }
                 obstacles.push(b);
 
+            }
+        }
+
+        let sniperInds: number[] = [];
+
+        while (sniperInds.length < TOTAL_SNIPERS) {
+            let rand = Math.floor(Math.random() * obstacles.length);
+            if (!sniperInds.includes(rand)) sniperInds.push(rand);
+        }
+
+        for (let i = 0; i < obstacles.length; i++) {
+            if (sniperInds.includes(i)) obstacles[i].addSniper();
+
+            // place snipers
+            if (obstacles[i].sniper != 0) {
+                let p = new Sniper(new Vector3(obstacles[i].position.x, obstacles[i].sniper * 8, obstacles[i].position.z), i);
+                entities.push(p);
             }
         }
     }
@@ -144,18 +148,18 @@ class Building extends Obstacle {
     collisionBox = new THREE.Box3();
     sniper: number = 0;
     name = 'building';
-    constructor(position: THREE.Vector3, levels: number, rotation: number, hasSniper: boolean) {
+    constructor(position: THREE.Vector3, levels: number, rotation: number) {
         super();
         this.object = new THREE.Object3D();
         this.position = position;
         this.levels = levels;
         this.rotation = rotation;
-        this._init(hasSniper);
+        this._init();
         // this._loadLevel(1);
 
     }
 
-    _init(hasSniper: boolean) {
+    _init() {
         let pavement = new Pavement(new THREE.Vector3(this.position.x, 0, this.position.z)); // originally y was -0.5 not sure why
 
         this.object.add(pavement.object);
@@ -164,16 +168,24 @@ class Building extends Obstacle {
             this._loadLevel(i + 1, i * 8);
         }
 
-        if (hasSniper) {
-            this.levels += 1;
-            this._loadSniper(this.levels, (this.levels - 1) * 8);
-        }
+        let center = this.position.clone();
+        center.y += this.levels * 3;
 
-        this.collisionBox.setFromCenterAndSize(this.position, new THREE.Vector3(13, 10, 13));
+        this.collisionBox.setFromCenterAndSize(center, new THREE.Vector3(13, this.levels * 10, 13));
 
         //helper to visualise collision box
         // let helper = new THREE.Box3Helper(this.collisionBox, new THREE.Color(0xff0000));
         // this.object.add(helper);
+    }
+
+    addSniper() {
+        this.levels += 1;
+        this._loadSniper(this.levels, (this.levels - 1) * 8);
+
+        let center = this.position.clone();
+        center.y += this.levels * 3;
+
+        this.collisionBox.setFromCenterAndSize(center, new THREE.Vector3(13, this.levels * 10, 13));
     }
 
     _loadLevel(id: number, offset: number) {
@@ -246,7 +258,7 @@ class Building extends Obstacle {
             }
         } else {
             // let variant be random number between 1 and 3
-            let variant = Math.floor(Math.random() * 10) + 1;
+            let variant = Math.floor(Math.random() * 9) + 1;
             switch (variant) {
                 case 1:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
@@ -293,13 +305,6 @@ class Building extends Obstacle {
                     break;
                 case 9:
                     url = new URL(`../../../assets/models/synthetica.glb`, import.meta.url);
-                    break;
-                case 10:
-                    if (id >= 8 && this.sniper == 0) {
-                        url = new URL(`../../../assets/models/sniper-building.glb`, import.meta.url);
-                        this.sniper = id;
-                    }
-                    else url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
                     break;
                 default:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
@@ -350,9 +355,12 @@ class Sniper extends Entity {
     isSniping: boolean = false;
     laser: Laser = new Laser(new THREE.Mesh(), new THREE.Quaternion, 0);
     duration: number = 20;
-    constructor(position: THREE.Vector3) {
+    sightRay: THREE.Raycaster = new THREE.Raycaster();
+    id: number;
+    constructor(position: THREE.Vector3, id: number) {
         super();
         this.position = position;
+        this.id = id;
         this._init();
     }
 
@@ -360,11 +368,13 @@ class Sniper extends Entity {
     }
 
     update(player: Player, delta: number, obstacles: Obstacle[]): void {
-        this.snipe(player.stealth, player.getCamera().position);
+        this.snipe(player.stealth, player.getCamera().position, obstacles);
         this.laser.update(player, delta, obstacles);
     }
 
     updateBullets(scene: THREE.Scene, entities: Entity[]): void {
+
+        // scene.add(new THREE.ArrowHelper(this.sightRay.ray.direction, this.sightRay.ray.origin, 300, 0xff0000));
 
         if (!this.isSniping) return;
 
@@ -382,11 +392,24 @@ class Sniper extends Entity {
         } else this.duration -= 1;
     }
 
-    snipe(stealth: number, playerPos: THREE.Vector3): void {
+    snipe(stealth: number, playerPos: THREE.Vector3, obstacles: Obstacle[]): void {
+        let direction = new THREE.Vector3();
+        direction.subVectors(playerPos, this.position).normalize();
+
+        this.sightRay.set(this.position, direction);
+
+        let intersection = new THREE.Vector3();
+        for (let i = 0; i < obstacles.length; i++) {
+            if (i == this.id) continue;
+            this.sightRay.ray.intersectBox(obstacles[i].collisionBox, intersection);
+            if (this.position.distanceToSquared(playerPos) < this.position.distanceToSquared(intersection)) intersection = new THREE.Vector3();
+        }
+        if (!intersection.equals(new THREE.Vector3())) return;
+
         if (stealth > -10 || this.isSniping) return;
         
         let chance = Math.random();
-        if (chance < 0.995) return;
+        if (chance < 0.99) return;
 
         this.isSniping = true;
         console.log("pew");
