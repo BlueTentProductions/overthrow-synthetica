@@ -6,7 +6,7 @@ import Entity from './Entity';
 import Player from './Player';
 import Laser from './Laser';
 
-const TOTAL_SNIPERS = 5;
+const TOTAL_SNIPERS = 7;
 
 export default class MapGenerator {
     roads: number[][] = [];
@@ -402,7 +402,8 @@ class Sniper extends Entity {
         for (let i = 0; i < obstacles.length; i++) {
             if (i == this.id) continue;
             this.sightRay.ray.intersectBox(obstacles[i].collisionBox, intersection);
-            if (this.position.distanceToSquared(playerPos) < this.position.distanceToSquared(intersection)) intersection = new THREE.Vector3();
+            if (!intersection.equals(new THREE.Vector3()) && this.position.distanceToSquared(playerPos) > this.position.distanceToSquared(intersection)) break;
+            else if (this.position.distanceToSquared(playerPos) > this.position.distanceToSquared(intersection)) intersection = new THREE.Vector3();
         }
         if (!intersection.equals(new THREE.Vector3())) return;
 
