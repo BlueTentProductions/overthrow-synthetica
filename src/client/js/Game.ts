@@ -131,7 +131,7 @@ export default class Game {
         this._scene.add(sun);
 
         let generator = new MapGenerator();
-        generator.generate(this._scene, this.obstacles);
+        generator.generate(this._scene, this.obstacles, this.entities);
 
 
         this.obstacles.forEach(obstacle => {
@@ -288,6 +288,7 @@ export default class Game {
             if (this.active) {
                 this.entities.forEach(entity => {
                     entity.update(this.player, delta, this.obstacles);
+                    entity.updateBullets(this._scene, this.entities);
                 });
             }
 

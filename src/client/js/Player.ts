@@ -336,8 +336,8 @@ export default class Player extends Entity {
             }
         } else this.detectionRaised = false;
 
-        // stealth recovers slower if goes under 0, and max -10
-        if (this.stealth < -10) this.stealth = -10;
+        // stealth recovers slower if goes under 0, and max -20
+        if (this.stealth < -20) this.stealth = -20;
 
         // cannot go over max stealth
         if (this.stealth > this.maxStealth) this.stealth = this.maxStealth;
