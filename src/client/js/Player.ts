@@ -193,56 +193,30 @@ export default class Player extends Entity {
 
         });
 
-
-
-
-
-
-
         this.blade.scale.multiplyScalar(0.6);
         this.blade.position.set(this.blade.position.x + 0.1, this.blade.position.y - 0.3, this.blade.position.z - 0.1);
         this.bladeDefaultPosition = this.blade.position.clone();
 
-        //add rotation to x
-        // this.blade.rotateZ(-Math.PI / 2);
-        // this.blade.rotateY(- Math.PI / 8);
-        // this.blade.rotateX(Math.PI);
         this.blade.rotateY(Math.PI);
         this.bladeDefaultRotation = this.blade.rotation.clone();
         this.getCamera().add(this.blade);
     }
 
     update(player: Player, delta: number, obstacles: Obstacle[]) {
-        // console.log(this.isSlashing);
-        // if (this.isSlashing) {
-        //     this._bladeMixer.clipAction(this.bladeAnimation[0]).play();
-        //     this.isSlashing = false;
-        // } else {
-        //     this._bladeMixer.clipAction(this.bladeAnimation[0]).stop();
-        // }
-
-        //play slash animation once and then stop
-
-
-
-
         if (this.isSlashing) {
             this._bladeMixer.clipAction(this.bladeAnimation[0]).play();
             this._slashTimer += delta;
         } else {
             this._bladeMixer.clipAction(this.bladeAnimation[0]).stop();
         }
-
-
-        if (this._slashTimer > 1) {
+        if (this._slashTimer > 0.7) {
             this._slashTimer = 0;
             this.isSlashing = false;
         }
-
-
         if (this._bladeMixer) this._bladeMixer.update(delta);
 
-        // console.log(this.isSlashing);
+
+        this.bladeBounceTimer += this.isSprinting ? delta * 6 : delta * 2;
 
     }
 
@@ -351,7 +325,7 @@ export default class Player extends Entity {
         }
 
         // stealth regeneration & cooldown regeneration
-        if (this.stealthCD >= this.maxStealthCD) this.stealth += delta * (moveVec.length() > 0.05 ? 0.3 : 3);
+        if (this.stealthCD >= this.maxStealthCD) this.stealth += delta * (moveVec.length() > 0.05 ? 1 : 5);
         else this.stealthCD += 1;
 
         // if stealth is broken, then detection meter will increase

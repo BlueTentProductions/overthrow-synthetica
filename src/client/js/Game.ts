@@ -5,6 +5,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
+import RenderPixelatedPass from './PixelatedPass';
 
 
 import Floor from './floor';
@@ -16,6 +17,7 @@ import Entity from './Entity';
 let loader = new GLTFLoader();
 
 let RENDER_DISTANCE = 100;
+let RETRO_MODE = true;
 
 export default class Game {
     _scene: THREE.Scene;
@@ -28,8 +30,9 @@ export default class Game {
     obstacles = [];
     entities: Entity[] = [];
     active = false;
+    _reset: Function;
 
-    constructor() {
+    constructor(reset: Function) {
         this._scene = new THREE.Scene();
         this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 600);
         this._camera.position.y = 1.6
@@ -41,6 +44,7 @@ export default class Game {
         this._scene.add(this._camera);
         this.player = new Player(this.obstacles, this._camera);
         this._init();
+        this._reset = reset;
     }
 
     _loadAssets() {
@@ -104,6 +108,15 @@ export default class Game {
         console.log(this._scene, this._camera);
         let renderPass = new RenderPass(this._scene, this._camera);
         this._composer.addPass(renderPass);
+
+        // let pixelatedPass = new RenderPixelatedPass(new THREE.Vector2(window.innerWidth, window.innerHeight), this._scene, this._camera);
+        // this._composer.addPass(pixelatedPass);
+
+        if (RETRO_MODE) {
+            let pixelatedPass = new RenderPixelatedPass(new THREE.Vector2(window.innerWidth / 6, window.innerHeight / 6), this._scene, this._camera);
+            this._composer.addPass(pixelatedPass);
+        }
+
         let bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1;
         bloomPass.strength = 0.8;
