@@ -21,5 +21,6 @@ This should build the project and open a browser window with the game running, i
 
 - WASD to move
 - Mouse to look around
+- Scroll wheel to change sword angle
 - Left Click to Attack
   
