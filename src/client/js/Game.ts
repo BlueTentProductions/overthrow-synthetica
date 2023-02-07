@@ -11,13 +11,13 @@ import RenderPixelatedPass from './PixelatedPass';
 import Floor from './floor';
 import Player from './Player';
 import MapGenerator from './MapGenerator';
-import { Pedestrian } from './Npc';
+import { Pedestrian, Officer } from './Npc';
 import Entity from './Entity';
 
 let loader = new GLTFLoader();
 
 let RENDER_DISTANCE = 100;
-let RETRO_MODE = true;
+let RETRO_MODE = false;
 
 export default class Game {
     _scene: THREE.Scene;
@@ -172,6 +172,15 @@ export default class Game {
             let pos = roads[Math.floor(Math.random() * roads.length)];
             let pedestrian = new Pedestrian(adjacencyList, pos)
             this.entities.push(pedestrian);
+        }
+
+        for (let i = 0; i < 10; i++) {
+
+            // let pos 
+            //make position a random road
+            let pos = roads[Math.floor(Math.random() * roads.length)];
+            let officer = new Officer(adjacencyList, pos)
+            this.entities.push(officer);
         }
 
         //add pedestrian to scene
