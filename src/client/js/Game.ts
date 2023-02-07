@@ -17,7 +17,7 @@ import Entity from './Entity';
 let loader = new GLTFLoader();
 
 let RENDER_DISTANCE = 100;
-let RETRO_MODE = false;
+let RETRO_MODE = true;
 
 export default class Game {
     _scene: THREE.Scene;
@@ -109,7 +109,7 @@ export default class Game {
         let renderPass = new RenderPass(this._scene, this._camera);
         this._composer.addPass(renderPass);
 
-        // let pixelatedPass = new RenderPixelatedPass(new THREE.Vector2(window.innerWidth, window.innerHeight), this._scene, this._camera);
+        // let pixelatedPass = new RenderPixelatedPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), this._scene, this._camera);
         // this._composer.addPass(pixelatedPass);
 
         if (RETRO_MODE) {

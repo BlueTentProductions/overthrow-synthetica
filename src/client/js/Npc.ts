@@ -17,6 +17,16 @@ class NPC extends Entity {
 
 }
 
+class Officer extends NPC {
+    constructor(map: Map<string, number[][]>, startRoad: number[]) {
+        super(map, startRoad);
+        this._init();
+    }
+
+    _init() {
+    }
+}
+
 class Pedestrian extends NPC {
     _walkDirection: number[];
     _walkSpeed = Math.random() * 2 + 0.5;
@@ -133,4 +143,7 @@ class Pedestrian extends NPC {
     }
 }
 
-export { Pedestrian };
+
+
+
+export { Pedestrian, Officer };
