@@ -17,7 +17,7 @@ import Entity from './Entity';
 let loader = new GLTFLoader();
 
 let RENDER_DISTANCE = 100;
-let RETRO_MODE = false;
+let RETRO_MODE = true;
 
 export default class Game {
     _scene: THREE.Scene;
