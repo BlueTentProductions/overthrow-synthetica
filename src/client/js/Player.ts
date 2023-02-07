@@ -351,7 +351,7 @@ export default class Player extends Entity {
         }
 
         // stealth regeneration & cooldown regeneration
-        if (this.stealthCD >= this.maxStealthCD) this.stealth += delta * (moveVec.length() > 0.05 ? 0.3: 3);
+        if (this.stealthCD >= this.maxStealthCD) this.stealth += delta * (moveVec.length() > 0.05 ? 0.3 : 3);
         else this.stealthCD += 1;
 
         // if stealth is broken, then detection meter will increase
@@ -361,7 +361,7 @@ export default class Player extends Entity {
                 if (this.detection < this.maxDetection) this.detection += 1;
             }
         } else this.detectionRaised = false;
-        
+
         // stealth recovers slower if goes under 0, and max -10
         if (this.stealth < -10) this.stealth = -10;
 

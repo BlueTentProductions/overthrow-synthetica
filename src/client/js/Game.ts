@@ -229,10 +229,10 @@ export default class Game {
                 stealthWheelColor = "rgb(255, 255, 255)";
                 break;
             case 2:
-                stealthWheelColor = "rgb(238, 210, 2)";
+                stealthWheelColor = "rgb(255, 174, 59)";
                 break;
             case 3:
-                stealthWheelColor = "rgb(202, 11, 0)";
+                stealthWheelColor = "rgb(255, 59, 151)";
                 break;
         }
 
