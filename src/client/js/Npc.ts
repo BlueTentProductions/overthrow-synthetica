@@ -296,7 +296,7 @@ class Pedestrian extends NPC {
 
         let distance = this.position.distanceTo(player.getCamera().position);
         if (distance < 10 && player.stealth <= 0) {
-            console.log("distance:" + distance, "wah!");
+            // console.log("distance:" + distance, "wah!");
             this.scared = true;
             // this._respawn(player);
         }

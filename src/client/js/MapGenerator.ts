@@ -17,6 +17,14 @@ export default class MapGenerator {
 
         this._generateRoadTree();
 
+        let sniperInds: number[] = [];
+
+        let totalBuildings = (this.roads.length * 4);
+        while (sniperInds.length < 4) {
+            let rand = Math.floor(Math.random() * totalBuildings);
+            if (!sniperInds.includes(rand)) sniperInds.push(rand);
+        }
+
         for (let i = 0; i < this.roads.length; i++) {
             let road = this.roads[i];
 
@@ -33,7 +41,10 @@ export default class MapGenerator {
                 }
                 this.obstacles[String(newPos)] = true;
                 let height = Math.floor(Math.random() * 8) + 2;
-                let b = new Building(new THREE.Vector3(newPos[0], 2, newPos[1]), height, rotations[j]);
+
+                let hasSniper: boolean = false;
+                if (sniperInds.includes(i * this.roads.length + j)) hasSniper = true;
+                let b = new Building(new THREE.Vector3(newPos[0], 2, newPos[1]), height, rotations[j], hasSniper);
 
                 // place snipers
                 if (b.sniper != 0) {
@@ -133,24 +144,29 @@ class Building extends Obstacle {
     collisionBox = new THREE.Box3();
     sniper: number = 0;
     name = 'building';
-    constructor(position: THREE.Vector3, levels: number, rotation: number) {
+    constructor(position: THREE.Vector3, levels: number, rotation: number, hasSniper: boolean) {
         super();
         this.object = new THREE.Object3D();
         this.position = position;
         this.levels = levels;
         this.rotation = rotation;
-        this._init();
+        this._init(hasSniper);
         // this._loadLevel(1);
 
     }
 
-    _init() {
+    _init(hasSniper: boolean) {
         let pavement = new Pavement(new THREE.Vector3(this.position.x, 0, this.position.z)); // originally y was -0.5 not sure why
 
         this.object.add(pavement.object);
 
         for (let i = 0; i < this.levels; i++) {
             this._loadLevel(i + 1, i * 8);
+        }
+
+        if (hasSniper) {
+            this.levels += 1;
+            this._loadSniper(this.levels, (this.levels - 1) * 8);
         }
 
         this.collisionBox.setFromCenterAndSize(this.position, new THREE.Vector3(13, 10, 13));
@@ -163,6 +179,16 @@ class Building extends Obstacle {
     _loadLevel(id: number, offset: number) {
 
         let levelObject = this._getLevelObject(id);
+        levelObject.position.set(this.position.x, offset, this.position.z);
+        levelObject.rotation.y = this.rotation;
+
+        this.object.add(levelObject);
+
+    }
+
+    _loadSniper(id: number, offset: number) {
+
+        let levelObject = this._getSniperObject(id);
         levelObject.position.set(this.position.x, offset, this.position.z);
         levelObject.rotation.y = this.rotation;
 
@@ -220,7 +246,7 @@ class Building extends Obstacle {
             }
         } else {
             // let variant be random number between 1 and 3
-            let variant = Math.floor(Math.random() * 11) + 1;
+            let variant = Math.floor(Math.random() * 10) + 1;
             switch (variant) {
                 case 1:
                     url = new URL(`../../../assets/models/apartment-1.glb`, import.meta.url);
@@ -283,8 +309,19 @@ class Building extends Obstacle {
         if (!url) return levelObject;
         loader.load(url.href, (gltf: GLTF) => {
             levelObject.add(gltf.scene);
-        }
-        );
+        });
+        return levelObject;
+    }
+
+    _getSniperObject(id: number) {
+        let loader = new GLTFLoader();
+        let levelObject = new THREE.Object3D();
+        var url = new URL(`../../../assets/models/sniper-building.glb`, import.meta.url);
+        this.sniper = id;
+        if (!url) return levelObject;
+        loader.load(url.href, (gltf: GLTF) => {
+            levelObject.add(gltf.scene);
+        });
         return levelObject;
     }
 }
@@ -349,7 +386,7 @@ class Sniper extends Entity {
         if (stealth > -10 || this.isSniping) return;
         
         let chance = Math.random();
-        if (chance < 0.95) return;
+        if (chance < 0.995) return;
 
         this.isSniping = true;
         console.log("pew");

@@ -26,7 +26,7 @@ export default class Laser extends Entity {
 
     moveLaser(delta: number, player: Player): void {
         if (this.collisionBox.intersectsBox(player.collisionBox)) {
-            player.health -= Math.random() * 10;
+            player.health -= Math.random() * 3;
         }
 
         if (this.collisionBox.min.y < 0) return;
