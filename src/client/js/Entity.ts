@@ -13,6 +13,8 @@ export default class Entity {
         return [Math.floor((this.position.x + (13 / 2)) / 13) * 13, Math.floor((this.position.z + (13 / 2)) / 13) * 13];
     }
 
+    updateBullets(scene: THREE.Scene, entities: Entity[]) {}
+
     update(player: Player, delta: number, obstacles: Obstacle[]) {
     }
 }
