@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>overthrow</title>
+    <link rel="stylesheet" type="text/css" href="app.css">
+</head>
+
+<body>
+    <script type="module" src="bundle.js"></script>
+    <div id="loading">
+        <div id="blue-tent-logo"></div>
+    </div>
+    <div id="main-menu">
+        <div id="blur"></div>
+        <!-- <button id="play-button" class="button">
+            <h2>(玩)</h2>
+            <h1>PLAY</h1>
+        </button> -->
+        <div id="menu-title"></div>
+
+        <div id="menu-button-row">
+
+            <button id="play-button" class="button">
+                <h2>(玩)</h2>
+                <h1>PLAY</h1>
+            </button>
+
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="crosshair"></div>
+        <div id="hud-container">
+            <div class="hud-component">
+                <h1>HEALTH</h1>
+                <div id="health-wheel" class="hud-wheel" style="--p:80;--b:15px;--c:rgb(255, 255, 255);">
+                    <div id="health-label">80%</div>
+                </div>
+
+            </div>
+
+            <div class="hud-component">
+                <h1>STEALTH</h1>
+                <div id="stealth-wheel" class="hud-wheel" style="--p:80;--b:15px;--c:rgb(255, 255, 255);">
+                    <div id="stealth-label">80%</div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>
