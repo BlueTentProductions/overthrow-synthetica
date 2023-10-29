@@ -14,18 +14,6 @@ body {
         }
 
 
-#blur {
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            width: 100%;
-            height: 100%;
-            /* background: #000; */
-            background: linear-gradient(0deg, rgb(30, 3, 39) 0%, rgba(121,9,74,1) 46%, rgba(0,212,255,0) 100%);
-            opacity: 0.8;
-            z-index: 2;
-
-        }
 
 #loading{
      position: absolute;
@@ -33,7 +21,7 @@ body {
             left: 0px;
             width: 100%;
             height: 100%;
-            background: #f5a01c;
+            background: #cecece;
             opacity: 1;
             z-index: 3;
 
@@ -182,7 +170,7 @@ body {
     height: 300px;
     z-index: 2;
     /* background-color: #f5a01c; */
-    background: linear-gradient(0deg,  rgba(121,9,74,1) 0%, rgba(0,212,255,0) 100%);
+
     opacity: 0.8;
     text-align: center;
     vertical-align: middle;

@@ -14,9 +14,15 @@ import MapGenerator from './MapGenerator';
 import { Pedestrian, Officer } from './Npc';
 import Entity from './Entity';
 
+// import Projectile from './Projectiles/Projectile';
+import Particle from './Particles/Particle';
+import Projectile from './Projectiles/Projectile';
+import Interactable from './Obstacles/Interactable';
+import Campfire from './Obstacles/Campfire';
+
 let loader = new GLTFLoader();
-let RENDER_DISTANCE = 100;
-let RETRO_MODE = false;
+let RENDER_DISTANCE = 300;
+let RETRO_MODE = true;
 
 export default class Game {
     _scene: THREE.Scene;
@@ -27,30 +33,42 @@ export default class Game {
     pause = false;
     player: Player;
     obstacles = [];
+    interactables: Interactable[] = [];
     entities: Entity[] = [];
+    particles: Particle[] = [];
+    projectiles: Projectile[] = [];
     active = false;
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
     _reset: Function;
 
     constructor(reset: Function) {
         this._scene = new THREE.Scene();
         this._camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.05, 600);
-        this._camera.position.y = 1.6
-        this._camera.position.z = 2
-        this._renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, precision: "mediump", powerPreference: "high-performance", stencil: false });
+        this._camera.position.y = 30
+        this._camera.position.z = -5
+
+
+        //make camera look downwards
+        this._camera.rotation.x = -Math.PI / 5;
+
+
+        this._renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, precision: "mediump", powerPreference: "high-performance", stencil: false, antialias: false });
         this._renderer.setSize(window.innerWidth, window.innerHeight);
-        this._renderer.setClearColor(0x16111e);
+        this._renderer.setClearColor(0x000000);
         this._scene = new THREE.Scene();
         this._scene.add(this._camera);
-        this.player = new Player(this.obstacles, this._camera);
+        this.player = new Player(this, this.obstacles);
         this._init();
         this._reset = reset;
     }
 
     _loadAssets() {
-        this.player.loadAssets(loader)
+        // this.player.loadAssets(loader)
     }
 
     _init() {
+
 
         const manager = new THREE.LoadingManager();
         manager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -71,25 +89,25 @@ export default class Game {
             document.getElementById("play-button")!.style.display = "none";
             document.getElementById("game-container")!.style.display = "block";
             //request pointer lock
-            document.body.requestPointerLock();
+
             this.player.activate();
         });
 
-        document.addEventListener('pointerlockchange', (event: Event) => {
-            if (document.pointerLockElement === document.body) this.pause = false;
-            else {
-                this.pause = true;
-                // theres a 1 second time window for the request, so after pausing, player must wait at least 1 second before being able to click resume
-                document.getElementById("main-menu")!.style.display = "block";
-                document.getElementById("play-button")!.style.display = "none";
-                document.getElementById("game-container")!.style.display = "none";
-                setTimeout(() => {
-                    document.getElementById("play-button")!.style.display = "block";
-                    document.getElementById("play-button")!.children[0].innerHTML = "(繼續)";
-                    document.getElementById("play-button")!.children[1].innerHTML = "RESUME";
-                }, 1000);
-            }
-        });
+        // document.addEventListener('pointerlockchange', (event: Event) => {
+        //     if (document.pointerLockElement === document.body) this.pause = false;
+        //     else {
+        //         this.pause = true;
+        //         // theres a 1 second time window for the request, so after pausing, player must wait at least 1 second before being able to click resume
+        //         document.getElementById("main-menu")!.style.display = "block";
+        //         document.getElementById("play-button")!.style.display = "none";
+        //         document.getElementById("game-container")!.style.display = "none";
+        //         setTimeout(() => {
+        //             document.getElementById("play-button")!.style.display = "block";
+        //             document.getElementById("play-button")!.children[0].innerHTML = "(繼續)";
+        //             document.getElementById("play-button")!.children[1].innerHTML = "RESUME";
+        //         }, 1000);
+        //     }
+        // });
 
         this._loadAssets();
 
@@ -104,7 +122,6 @@ export default class Game {
 
     _createComposer() {
         this._composer = new EffectComposer(this._renderer);
-        console.log(this._scene, this._camera);
         let renderPass = new RenderPass(this._scene, this._camera);
         this._composer.addPass(renderPass);
 
@@ -112,21 +129,21 @@ export default class Game {
         // this._composer.addPass(pixelatedPass);
 
         if (RETRO_MODE) {
-            let pixelatedPass = new RenderPixelatedPass(new THREE.Vector2(window.innerWidth / 6, window.innerHeight / 6), this._scene, this._camera);
+            let pixelatedPass = new RenderPixelatedPass(new THREE.Vector2(window.innerWidth / 3, window.innerHeight / 3), this._scene, this._camera);
+            //set edge strength to 0.5
             this._composer.addPass(pixelatedPass);
         }
 
-        let bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;
-        bloomPass.strength = 0.8;
-        bloomPass.radius = 0.5;
+        let bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.7, 0.8, 0.95);
         this._composer.addPass(bloomPass);
 
 
     }
 
     _setUpScene() {
-        let sun = new THREE.HemisphereLight(0x000d56, 0xf08bff, 1);
+
+
+        let sun = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
         this._scene.add(sun);
 
         let generator = new MapGenerator();
@@ -137,55 +154,65 @@ export default class Game {
             this._scene.add(obstacle['object']);
         });
 
-        let roads: number[][] = generator.roads;
+        this.interactables.push(new Campfire(this, new THREE.Vector3(10, 0, 10), 0))
+
+        this.interactables.forEach(interactable => {
+            this._scene.add(interactable['object']);
+        });
+
+        // let roads: number[][] = generator.roads;
         //form adjacency matrix for roads
-        let adjacencyList: Map<string, number[][]> = new Map();
-        roads.forEach(road => {
-            adjacencyList.set(road.toString(), []);
-        });
+        // let adjacencyList: Map<string, number[][]> = new Map();
+        // roads.forEach(road => {
+        //     adjacencyList.set(road.toString(), []);
+        // });
 
-        roads.forEach(road => {
-            roads.forEach(otherRoad => {
-                if (road !== otherRoad) {
-                    if (road[0] === otherRoad[0] && Math.abs(road[1] - otherRoad[1]) === 13) {
-                        adjacencyList.get(road.toString())!.push(otherRoad);
-                    }
-                    if (road[1] === otherRoad[1] && Math.abs(road[0] - otherRoad[0]) === 13) {
-                        adjacencyList.get(road.toString())!.push(otherRoad);
-                    }
-                }
-            });
-        });
+        // roads.forEach(road => {
+        //     roads.forEach(otherRoad => {
+        //         if (road !== otherRoad) {
+        //             if (road[0] === otherRoad[0] && Math.abs(road[1] - otherRoad[1]) === 13) {
+        //                 adjacencyList.get(road.toString())!.push(otherRoad);
+        //             }
+        //             if (road[1] === otherRoad[1] && Math.abs(road[0] - otherRoad[0]) === 13) {
+        //                 adjacencyList.get(road.toString())!.push(otherRoad);
+        //             }
+        //         }
+        //     });
+        // });
 
-        console.log(adjacencyList);
-        console.log(adjacencyList.get([0, 0].toString())!);
+        // console.log(adjacencyList);
+        // console.log(adjacencyList.get([0, 0].toString())!);
 
-        let pos = [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]]
+        // let pos = [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]]
 
-        //add pedestrian to entities
+        // //add pedestrian to entities
 
-        for (let i = 0; i < 10; i++) {
+        // for (let i = 0; i < 100; i++) {
 
-            // let pos 
-            //make position a random road
-            let pos = roads[Math.floor(Math.random() * roads.length)];
-            let pedestrian = new Pedestrian(adjacencyList, pos)
-            this.entities.push(pedestrian);
-        }
+        //     // let pos 
+        //     //make position a random road
+        //     let pos = roads[Math.floor(Math.random() * roads.length)];
+        //     let pedestrian = new Pedestrian(adjacencyList, pos)
+        //     this.entities.push(pedestrian);
+        // }
 
-        for (let i = 0; i < 10; i++) {
+        // for (let i = 0; i < 10; i++) {
 
-            // let pos 
-            //make position a random road
-            let pos = roads[Math.floor(Math.random() * roads.length)];
-            let officer = new Officer(adjacencyList, pos)
-            this.entities.push(officer);
-        }
+        //     // let pos 
+        //     //make position a random road
+        //     let pos = roads[Math.floor(Math.random() * roads.length)];
+        //     let officer = new Officer(adjacencyList, pos)
+        //     this.entities.push(officer);
+        // }
 
         //add pedestrian to scene
         this.entities.forEach(entity => {
             this._scene.add(entity['object']);
         });
+
+        console.log(this.player['object'])
+        this._scene.add(this.player['object']);
+
 
 
 
@@ -214,7 +241,7 @@ export default class Game {
         this._scene.add(floor.mesh)
 
         //add THREE.Fog
-        this._scene.fog = new THREE.Fog(0x16111e, 0, RENDER_DISTANCE * 9 / 10);
+        this._scene.fog = new THREE.Fog(0xa6b7bb, 0, RENDER_DISTANCE * 9 / 10);
 
         // for (let obstacle of this.obstacles) {
         //     console.log(obstacle['collisionBox']['min'], obstacle['collisionBox']['max'])
@@ -242,31 +269,28 @@ export default class Game {
         percentage = Math.round(percentage);
         document.getElementById("health-label")!.innerHTML = percentage + "%";
 
-        // stealth
-        let stealthWheel = document.getElementById("stealth-wheel")!
-        let stealthPercentage = this.player.stealth / this.player.maxStealth * 100;
-        let stealthWheelColor = "rgb(255, 255, 255)";
 
-        // stealth wheel colors for detection
-        switch (this.player.detection) {
-            case 1:
-                stealthWheelColor = "rgb(255, 255, 255)";
-                break;
-            case 2:
-                stealthWheelColor = "rgb(255, 174, 59)";
-                break;
-            case 3:
-                stealthWheelColor = "rgb(255, 59, 151)";
-                break;
-        }
-
-        stealthWheel.setAttribute("style", "--p:" + stealthPercentage + ";--b:15px;--c:" + stealthWheelColor + ";");
-        stealthPercentage = Math.round(stealthPercentage);
-        if (stealthPercentage < -10) document.getElementById("stealth-label")!.innerHTML = "&#x26A0;";
-        else if (stealthPercentage < 0) document.getElementById("stealth-label")!.innerHTML = "&#x1F441;";
-        else document.getElementById("stealth-label")!.innerHTML = stealthPercentage + "%";
 
     }
+
+    addProjectile(p: Projectile) {
+        if (p.owner == 0) {
+            console.log("player projectile probably created.")
+        }
+
+        console.log("PRE PUSH: " + this.projectiles.length)
+        this.projectiles.push(p);
+        console.log("POST PUSH: " + this.projectiles.length)
+        this._scene.add(p.object);
+
+    }
+
+    addParticle(p: Particle) {
+        this.particles.push(p);
+        this._scene.add(p.object);
+
+    }
+
 
 
     animate() {
@@ -274,8 +298,14 @@ export default class Game {
 
         this.updatePause()
 
+
+        //raycast for mouse intersect with floor
+        this.mouse = new THREE.Vector2();
+
+
+
         this.obstacles.forEach(obstacle => {
-            let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - obstacle['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - obstacle['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - obstacle['position']['z'], 2));
+            let distance = Math.sqrt(Math.pow(this.player.object.position.x - obstacle['position']['x'], 2) + Math.pow(this.player.object.position.y - obstacle['position']['y'], 2) + Math.pow(this.player.object.position.z - obstacle['position']['z'], 2));
             if (distance < RENDER_DISTANCE) {
                 this._scene.add(obstacle['object']);
             } else {
@@ -283,19 +313,44 @@ export default class Game {
             }
         });
 
-        this.entities.forEach(entity => {
-            let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - entity['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - entity['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - entity['position']['z'], 2));
-            if (distance < RENDER_DISTANCE / 2) {
-                this._scene.add(entity['object']);
-            } else {
-                this._scene.remove(entity['object']);
-            }
-        });
+        // this.entities.forEach(entity => {
+        //     let distance = Math.sqrt(Math.pow(this.player.getCamera().position.x - entity['position']['x'], 2) + Math.pow(this.player.getCamera().position.y - entity['position']['y'], 2) + Math.pow(this.player.getCamera().position.z - entity['position']['z'], 2));
+        //     if (distance < RENDER_DISTANCE / 2) {
+        //         this._scene.add(entity['object']);
+        //     } else {
+        //         this._scene.remove(entity['object']);
+        //     }
+        // });
 
 
 
         const time: number = performance.now()
         const delta: number = (time - this._prevTime) / 1000
+
+
+        //for each particle, update. if life is less than 0, remove from scene
+        this.particles.forEach(particle => {
+            particle.update(delta);
+            if (particle.life <= 0) {
+                this._scene.remove(particle.object);
+
+                this.particles.splice(this.particles.indexOf(particle), 1);
+            }
+        });
+
+        this.projectiles.forEach(projectile => {
+            projectile.update(delta, this, this.player, this.entities, this.obstacles, this.interactables);
+            if (projectile.life <= 0) {
+                this._scene.remove(projectile.object);
+                this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
+            }
+        });
+
+
+        this.interactables.forEach(interactable => {
+            interactable.update(delta);
+        });
+
 
         if (!this.pause) {
             if (this.active) {
@@ -305,10 +360,14 @@ export default class Game {
                 });
             }
 
-            this.player.move_update(this.active, delta, this.obstacles)
+            this.player.move_update(this.active, delta, this.obstacles, this.interactables)
             this.player.update(this.player, delta, this.obstacles);
         }
 
+        // console.log(this.player.object.position)
+
+        //set camera position to player position
+        this._camera.position.set(this.player.object.position.x, this.player.object.position.y + 8, this.player.object.position.z + 10);
 
         this._prevTime = time;
         this._composer?.render();

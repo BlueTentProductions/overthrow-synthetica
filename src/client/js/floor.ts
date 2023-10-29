@@ -8,10 +8,10 @@ export default class Floor {
     constructor(worldSize: number) {
         this.geometry = new THREE.PlaneGeometry(worldSize, worldSize, worldSize, worldSize);
         this.geometry.rotateX(- Math.PI / 2);
-        this.material = new THREE.MeshBasicMaterial({
-            color: 0x1AD1FF,
-            wireframe: true,
+        this.material = new THREE.MeshLambertMaterial({
+            color: 0x84817c,
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.receiveShadow = true;
     }
 }

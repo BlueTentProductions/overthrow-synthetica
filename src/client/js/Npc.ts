@@ -1,15 +1,16 @@
 import Entity from "./Entity";
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import Obstacle from "./Obstacle";
+import Obstacle from "./Obstacles/Obstacle";
 import Player from "./Player";
 import { dir } from "console";
+import Game from "./Game";
 
 class NPC extends Entity {
     _cityMap: Map<string, number[][]>;
     _currentRoad: number[];
-    constructor(map: Map<string, number[][]>, startRoad: number[]) {
-        super();
+    constructor(context: Game, map: Map<string, number[][]>, startRoad: number[]) {
+        super(context);
         this._cityMap = map;
         this._currentRoad = startRoad;
 
@@ -26,8 +27,8 @@ class Officer extends NPC {
     _mixer: any = undefined;
     _animations: THREE.AnimationClip[] = [];
     scared: boolean = false;
-    constructor(map: Map<string, number[][]>, startRoad: number[]) {
-        super(map, startRoad);
+    constructor(context: Game, map: Map<string, number[][]>, startRoad: number[]) {
+        super(context, map, startRoad);
         let dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
         let randomIndex = Math.floor(Math.random() * dirs.length);
         this._walkDirection = dirs[randomIndex];
@@ -206,8 +207,8 @@ class Pedestrian extends NPC {
     _mixer: any = undefined;
     _animations: THREE.AnimationClip[] = [];
     scared: boolean = false;
-    constructor(map: Map<string, number[][]>, startRoad: number[]) {
-        super(map, startRoad);
+    constructor(context: Game, map: Map<string, number[][]>, startRoad: number[]) {
+        super(context, map, startRoad);
         let dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
         let randomIndex = Math.floor(Math.random() * dirs.length);
         this._walkDirection = dirs[randomIndex];
@@ -294,12 +295,8 @@ class Pedestrian extends NPC {
 
         this.object.position.copy(this.position);
 
-        let distance = this.position.distanceTo(player.getCamera().position);
-        if (distance < 10 && player.stealth <= 0) {
-            // console.log("distance:" + distance, "wah!");
-            this.scared = true;
-            // this._respawn(player);
-        }
+        let distance = this.position.distanceTo(player.object.position);
+
     }
 
     _respawn(player: Player) {

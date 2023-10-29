@@ -12,7 +12,7 @@ export default class RenderPixelatedPass extends Pass {
     normalRenderTarget: WebGLRenderTarget
     normalMaterial: THREE.Material
 
-    constructor(resolution: THREE.Vector2, scene: THREE.Scene, camera: THREE.Camera) {
+    constructor(resolution: THREE.Vector2, scene: THREE.Scene, camera: THREE.Camera,) {
         super()
         this.resolution = resolution
         this.fsQuad = new FullScreenQuad(this.material())
@@ -134,8 +134,8 @@ export default class RenderPixelatedPass extends Pass {
                     float tLum = lum(texel);
                     // float normalEdgeCoefficient = (smoothSign(tLum - .3, .1) + .7) * .25;
                     // float depthEdgeCoefficient = (smoothSign(tLum - .3, .1) + .7) * .3;
-                    float normalEdgeCoefficient = .3;
-                    float depthEdgeCoefficient = .4;
+                    float normalEdgeCoefficient = .0;
+                    float depthEdgeCoefficient = .0;
                     float dei = depthEdgeIndicator();
                     float nei = normalEdgeIndicator();
                     float coefficient = dei > 0.0 ? (1.0 - depthEdgeCoefficient * dei) : (1.0 + normalEdgeCoefficient * nei);
